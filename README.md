@@ -32,6 +32,7 @@ We have 0.42 Bitcoin. Let's write an R script reporting on the current value of 
 
 <details>
   <summary>Spoiler ...</summary>
+
 ```r
 library(devtools)
 install_github('daroczig/binancer')
@@ -49,4 +50,8 @@ coin_prices[symbol == 'BTC', usd]
 ## don't forget that we need to report on the price of 0.42 BTC instead of 1 BTC
 coin_prices[symbol == 'BTC', usd * 0.42]
 ```
+
 </details>
+
+
+
