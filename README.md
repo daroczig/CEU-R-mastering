@@ -321,13 +321,11 @@ balance <- coin_prices[, .(date = as.Date(close_time), btcusd = close)]
 str(balance)
 str(usdhufs)
 
-x <- merge(balance, usdhufs, by = 'date', all.x = TRUE)
-
-## rolling join
+## rolling join to look up the most recently available USD/HUF rate
+## (published on business days) for each calendar day
 setkey(balance, date)
 setkey(usdhufs, date)
-balance <- usdhufs[balance, roll = TRUE] ## DT[i, j, by = ...]
-
+balance <- usdhufs[balance, roll = TRUE]
 str(balance)
 
 balance[, btchuf := btcusd * usdhuf]
