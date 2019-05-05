@@ -24,14 +24,14 @@ R packages to be installed:
 * `openxlsx`
 * `devtools`
 
-## Exercises solved from week to week
+## Exercises
 
 ### The current price of 0.42 BTC
 
 We have 0.42 Bitcoin. Let's write an R script reporting on the current value of this asset in USD.
 
 <details>
-  <summary>Spoiler ...</summary>
+  <summary>Click here for a potential solution ...</summary>
 
 ```r
 library(devtools)
