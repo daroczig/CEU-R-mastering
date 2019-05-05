@@ -23,3 +23,30 @@ R packages to be installed:
 * `daroczig/botor` (requires Python and `boto3` Python module)
 * `openxlsx`
 * `devtools`
+
+## Exercises solved from week to week
+
+### The current price of 0.42 BTC
+
+We have 0.42 Bitcoin. Let's write an R script reporting on the current value of this asset in USD.
+
+<details>
+  <summary>Spoiler ...</summary>
+```r
+library(devtools)
+install_github('daroczig/binancer')
+
+library(binancer)
+coin_prices <- binance_ticker_all_prices()
+
+library(data.table)
+coin_prices[from == 'BTC' & to == 'USDT', to_usd]
+
+## alternative solution
+coin_prices <- binance_coins_prices()
+coin_prices[symbol == 'BTC', usd]
+
+## don't forget that we need to report on the price of 0.42 BTC instead of 1 BTC
+coin_prices[symbol == 'BTC', usd * 0.42]
+```
+</details>
