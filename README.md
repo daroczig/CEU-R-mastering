@@ -347,3 +347,107 @@ ggplot(balance, aes(date, value)) +
 ```
 
 </details>
+
+### The price of 0.42 BTC and 1.2 ETH in the past 30 days
+
+Let's do the same report as above, but now we not only have 0.42 Bitcoin, but 1.2 Ethereum as well.
+
+<details>
+  <summary>Click here for a potential solution ...</summary>
+
+```r
+library(binancer)
+library(httr)
+library(data.table)
+library(logger)
+library(scales)
+library(ggplot2)
+
+forint <- function(x) {
+  dollar(x, prefix = '', suffix = ' HUF')
+}
+
+## ########################################################
+## CONSTANTS
+
+BITCOINS  <- 0.42
+ETHEREUMS <- 1.2
+
+## ########################################################
+## Loading data
+
+## USD in HUF
+response <- GET(
+  'https://api.exchangeratesapi.io/history',
+  query = list(
+    start_at = Sys.Date() - 40,
+    end_at   = Sys.Date(),
+    base     = 'USD',
+    symbols  = 'HUF'
+  ))
+exchange_rates <- content(response)
+str(exchange_rates)
+exchange_rates <- exchange_rates$rates
+
+library(data.table)
+usdhufs <- data.table(
+  date = as.Date(names(exchange_rates)),
+  usdhuf = as.numeric(unlist(exchange_rates)))
+str(usdhufs)
+
+## Cryptocurrency prices in USD
+btc_prices <- binance_klines('BTCUSDT', interval = '1d', limit = 30)
+eth_prices <- binance_klines('ETHUSDT', interval = '1d', limit = 30)
+coin_prices <- rbind(btc_prices, eth_prices)
+str(coin_prices)
+
+## DRY (don't repeat yourself)
+balance <- rbindlist(lapply(c('BTC', 'ETH'), function(s) {
+  binance_klines(paste0(s, 'USDT'), interval = '1d', limit = 30)[, .(
+    date = as.Date(close_time),
+    usdt = close,
+    symbol = s
+  )]
+}))
+str(balance)
+
+balance[, amount := switch(
+  symbol,
+  'BTC' = BITCOINS,
+  'ETH' = ETHEREUMS,
+  stop('Unsupported coin')),
+  by = symbol]
+str(balance)
+
+## rolling join
+setkey(balance, date)
+setkey(usdhufs, date)
+balance <- usdhufs[balance, roll = TRUE] ## DT[i, j, by = ...]
+
+str(balance)
+
+balance[, value := amount * usdt * usdhuf]
+str(balance)
+
+## ########################################################
+## Report
+
+ggplot(balance, aes(date, value, fill = symbol)) + 
+  geom_col() +
+  xlab('') +
+  ylab('') + 
+  scale_y_continuous(labels = forint) +
+  theme_bw() +
+  ggtitle(
+    'My crypto fortune',
+    subtitle = balance[date == max(date), paste(paste(amount, symbol), collapse = ' + ')])
+```
+
+</details>
+
+## References
+
+* AWS Console: https://ceu.signin.aws.amazon.com/console
+* Binance (cryptocurrency exchange) API: https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md (R implementation available at https://github.com/daroczig/binancer)
+* Foreign exchange rates API, eg https://exchangeratesapi.io
+* Free MySQL database: https://remotemysql.com
