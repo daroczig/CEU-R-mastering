@@ -502,31 +502,31 @@ forint <- function(x) {
 10. Keep committing to the git repo
 11. Add a new function that gets the most recent USD/HUF rate with some logging using the `logger` package
 
-<details>
-  <summary>`converter.R`</summary>
+    <details>
+      <summary><code>converter.R</code></summary>
 
-```r
-#' Converting USD to HUF
-#' @param usd number
-#' @return number
-#' @export
-#' @importFrom httr GET content
-#' @importFrom logger log_debug log_trace
-#' @examples
-#' convert_usd_to_huf(1)
-#' forint(convert_usd_to_huf(1))
-#' @seealso forint
-convert_usd_to_huf <- function(usd) {
-  response <- GET('https://api.exchangeratesapi.io/latest?base=USD')
-  exchange_rates <- content(response)$rates
-  log_trace('Found {length(exchange_rates)} exchange rates for USD')
-  usdhuf <- exchange_rates$HUF
-  log_debug('1 USD currently costs {usdhuf} Hungarian Forints')
-  usd * usdhuf
-}
-```
+    ```r
+    #' Converting USD to HUF
+    #' @param usd number
+    #' @return number
+    #' @export
+    #' @importFrom httr GET content
+    #' @importFrom logger log_debug log_trace
+    #' @examples
+    #' convert_usd_to_huf(1)
+    #' forint(convert_usd_to_huf(1))
+    #' @seealso forint
+    convert_usd_to_huf <- function(usd) {
+      response <- GET('https://api.exchangeratesapi.io/latest?base=USD')
+      exchange_rates <- content(response)$rates
+      log_trace('Found {length(exchange_rates)} exchange rates for USD')
+      usdhuf <- exchange_rates$HUF
+      log_debug('1 USD currently costs {usdhuf} Hungarian Forints')
+      usd * usdhuf
+    }
+    ```
 
-</details>
+    </details>
 
 12. Try suppressing debug log messages in this package by `log_threshold`'s `namespace`
 
