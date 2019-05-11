@@ -445,6 +445,91 @@ ggplot(balance, aes(date, value, fill = symbol)) +
 
 </details>
 
+### Move helpers to a new R package
+
+1. Click File / New Project / New folder and create a new R package -- that will fill in your newly created folder with a package skeleton delivering the `hello` function in the `hello.R` file.
+
+2. Get familiar with:
+
+    * the `DESCRIPTION` file
+
+        * semantic versioning: https://semver.org
+        * open-source license, see eg http://r-pkgs.had.co.nz/description.html#license or https://rstats-pkgs.readthedocs.io/en/latest/licensing.html
+
+    * the `R` subfolder
+    * the `man` subfolder
+    * the `NAMESPACE` file
+
+3. Install the package (in the Build menu), load it and try `hello()`, then `?hello`
+4. Create a git repo (if not done that already) and add/commit this package skeleton
+5. Add a new function called `forint` in the `R` subfolder:
+
+<details>
+  <summary>`forint.R`</summary>
+
+```r
+forint <- function(x) {
+  dollar(x, prefix = '', suffix = ' HUF')
+}
+```
+
+</details>
+
+6. Install the package, re-load it, and try running `forint` eg calling on `42` -- realize it's failing
+7. After loading the `scales` package (that delivers the `dollar` function), it works, but that's not how we need to fix this (see below)
+8. Look at the docs of `forint` -- realize it's missing, so let's learn about `roxygen2` and update the `forint.R` file:
+
+<details>
+  <summary>`forint.R`</summary>
+
+```r
+#' Formats Hungarian Forint
+#' @param x number
+#' @return string
+#' @export
+#' @importFrom scales dollar
+#' @examples
+#' forint(100000)
+#' forint(10.3241245125125)
+forint <- function(x) {
+  dollar(x, prefix = '', suffix = ' HUF')
+}
+```
+
+</details>
+
+9. Run `roxygen2` on the package by enabling it in the "Build" menu's "Configure Build Tools", then "Document" it, and make sure to check what changes happened in the `man`, `NAMESPACE` (you might need to delete the original one) and `DESCRIPTION` files
+10. Keep committing to the git repo
+11. Add a new function that gets the most recent USD/HUF rate with some logging using the `logger` package
+
+<details>
+  <summary>`converter.R`</summary>
+
+```r
+#' Converting USD to HUF
+#' @param usd number
+#' @return number
+#' @export
+#' @importFrom httr GET content
+#' @importFrom logger log_debug log_trace
+#' @examples
+#' convert_usd_to_huf(1)
+#' forint(convert_usd_to_huf(1))
+#' @seealso forint
+convert_usd_to_huf <- function(usd) {
+  response <- GET('https://api.exchangeratesapi.io/latest?base=USD')
+  exchange_rates <- content(response)$rates
+  log_trace('Found {length(exchange_rates)} exchange rates for USD')
+  usdhuf <- exchange_rates$HUF
+  log_debug('1 USD currently costs {usdhuf} Hungarian Forints')
+  usd * usdhuf
+}
+```
+
+</details>
+
+12. Try suppressing debug log messages in this package by `log_threshold`'s `namespace`
+
 ### Take-home assignment
 
 You can either work on an actual project outlined below, OR you can decide to skip that task and contribute to open-source R packages and/or projects for you final grade.
