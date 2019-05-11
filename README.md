@@ -464,43 +464,44 @@ ggplot(balance, aes(date, value, fill = symbol)) +
 4. Create a git repo (if not done that already) and add/commit this package skeleton
 5. Add a new function called `forint` in the `R` subfolder:
 
-<details>
-  <summary>`forint.R`</summary>
+    <details>
+      <summary>`forint.R`</summary>
 
-```r
-forint <- function(x) {
-  dollar(x, prefix = '', suffix = ' HUF')
-}
-```
+    ```r
+    forint <- function(x) {
+      dollar(x, prefix = '', suffix = ' HUF')
+    }
+    ```
 
-</details>
+    </details>
 
 6. Install the package, re-load it, and try running `forint` eg calling on `42` -- realize it's failing
 7. After loading the `scales` package (that delivers the `dollar` function), it works, but that's not how we need to fix this (see below)
 8. Look at the docs of `forint` -- realize it's missing, so let's learn about `roxygen2` and update the `forint.R` file:
 
-<details>
-  <summary>`forint.R`</summary>
+    <details>
+      <summary>`forint.R`</summary>
 
-```r
-#' Formats Hungarian Forint
-#' @param x number
-#' @return string
-#' @export
-#' @importFrom scales dollar
-#' @examples
-#' forint(100000)
-#' forint(10.3241245125125)
-forint <- function(x) {
-  dollar(x, prefix = '', suffix = ' HUF')
-}
-```
+    ```r
+    #' Formats Hungarian Forint
+    #' @param x number
+    #' @return string
+    #' @export
+    #' @importFrom scales dollar
+    #' @examples
+    #' forint(100000)
+    #' forint(10.3241245125125)
+    forint <- function(x) {
+      dollar(x, prefix = '', suffix = ' HUF')
+    }
+    ```
 
-</details>
+    </details>
 
 9. Run `roxygen2` on the package by enabling it in the "Build" menu's "Configure Build Tools", then "Document" it, and make sure to check what changes happened in the `man`, `NAMESPACE` (you might need to delete the original one) and `DESCRIPTION` files
 10. Keep committing to the git repo
-11. Add a new function that gets the most recent USD/HUF rate with some logging using the `logger` package
+11. Delete `hello.R` and rerun `roxygen2`
+12. Add a new function that gets the most recent USD/HUF rate with some logging using the `logger` package
 
     <details>
       <summary><code>converter.R</code></summary>
@@ -528,7 +529,7 @@ forint <- function(x) {
 
     </details>
 
-12. Try suppressing debug log messages in this package by `log_threshold`'s `namespace`
+13. Try suppressing debug log messages in this package by `log_threshold`'s `namespace`
 
 ### Take-home assignment
 
