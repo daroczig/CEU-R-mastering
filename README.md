@@ -445,9 +445,35 @@ ggplot(balance, aes(date, value, fill = symbol)) +
 
 </details>
 
+### Take-home assignment
+
+You can either work on an actual project outlined below, OR you can decide to skip that task and contribute to open-source R packages and/or projects for you final grade.
+
+If you decide to work on a spec'ed out project:
+
+1. Create an R package with an open-source license and push to a public GitHub repo
+2. Add a function called `eurusd` that looks up the most recent USD/EUR exchange rate via an API call and returns the rate as a number
+3. Add another function called `eurusds` that takes two arguments (`date_from` and `date_to`) and returns a `data.table` object on the daily rates from `date_from` to the `date_to` dates provided with 2 columns (date and exchange rate)
+4. Add `convert_usd_to_eur` function that looks up the most recent USD/EUR exchange rate and compute the provided USD amount in EUR (as a number)
+5. Add `eur` function to the package, similar to `scales::dollar`, that formats a number to a string using the Euro sign, rounding up to 2 digits and using the comma as the `big.mark` (every 3 decimals)
+6. Write a function that reverses `eur`, eg call it `uneur`, so it takes a string (eg `"-€0.10"`) and transforms to a number (eg `-0.10` in this case). Make sure it works with the "big mark" as well (eg for `"$100,000"`)
+7. Add a vignette to the package that demos the use of `eur` and `eurusds` by fetching the daily volume of Bitcoins sold for "USDT" on Binance and reports the overall value of this asset in EUR on a `ggplot` for the past 45 days
+8. Use `pkgdown` to generate a website for your package and host it on GitHub using the `gh-pages` branch
+
+If you decide to skip the above described project and would rather contribute to open-source projects:
+
+* Look for GitHub repos with tickets tagged with "help wanted", eg at http://github-help-wanted.com/?languages=R&labels=help+wanted&page=1&sort=created&order=desc
+* Feel free to contribute simple things first, eg fixing typos or improving documentation, adding examples etc
+* Make sure to check if the project has any contribution guide or similar, also check the previous PRs to get familiar with the process and style
+
+Submission: send link to your R package's GitHub repo or your open-source contributions (PRs) via Moodle until Jun 9, 2019
+
 ## References
 
 * AWS Console: https://ceu.signin.aws.amazon.com/console
 * Binance (cryptocurrency exchange) API: https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md (R implementation available at https://github.com/daroczig/binancer)
 * Foreign exchange rates API, eg https://exchangeratesapi.io
 * Free MySQL database: https://remotemysql.com
+* "Writing R Extensions" docs: https://cran.r-project.org/doc/manuals/r-release/R-exts.html
+* Hadley Wickham's "R packages" book: http://r-pkgs.had.co.nz
+* `pkgdown` package: https://pkgdown.r-lib.org/index.html
