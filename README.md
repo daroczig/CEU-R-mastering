@@ -465,7 +465,7 @@ ggplot(balance, aes(date, value, fill = symbol)) +
 5. Add a new function called `forint` in the `R` subfolder:
 
     <details>
-      <summary>`forint.R`</summary>
+      <summary><code>forint.R</code></summary>
 
     ```r
     forint <- function(x) {
@@ -480,7 +480,7 @@ ggplot(balance, aes(date, value, fill = symbol)) +
 8. Look at the docs of `forint` -- realize it's missing, so let's learn about `roxygen2` and update the `forint.R` file:
 
     <details>
-      <summary>`forint.R`</summary>
+      <summary><code>forint.R</code></summary>
 
     ```r
     #' Formats Hungarian Forint
