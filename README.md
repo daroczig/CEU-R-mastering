@@ -664,6 +664,114 @@ ggplot(balance, aes(date, value, fill = symbol)) +
     db_query("INSERT INTO coins VALUES ('LTC', 25)", 'remotemysql')
     ```
 
+### Report on the price of cryptocurrency assets based on the transaction history read from a database
+
+1. Let's prepare the transaction table:
+
+    ```r
+    library(dbr)
+    options('dbr.db_config_path' = '/path/to/database.yml')
+    options('dbr.output_format' = 'data.table')
+    
+    db_query('
+      CREATE TABLE transactions (
+        date TIMESTAMP NOT NULL,
+        symbol VARCHAR(3) NOT NULL,
+        amount DOUBLE NOT NULL DEFAULT 0)',
+      db = 'remotemysql')
+
+    db_query('TRUNCATE TABLE transactions', 'remotemysql')
+    db_query('INSERT INTO transactions VALUES ("2019-01-01 10:42:02", "BTC", 1.42)', 'remotemysql')
+    db_query('INSERT INTO transactions VALUES ("2019-01-01 10:45:20", "ETH", 1.2)', 'remotemysql')
+    db_query('INSERT INTO transactions VALUES ("2019-02-28", "BTC", -1)', 'remotemysql')
+    db_query('INSERT INTO transactions VALUES ("2019-04-13", "NEO", 100)', 'remotemysql')
+    db_query('INSERT INTO transactions VALUES ("2019-04-20 12:12:21", "LTC", 25)', 'remotemysql')
+    ```
+
+<details>
+  <summary>Click here for a potential solution ...</summary>
+
+```r
+library(binancer)
+library(httr)
+library(data.table)
+library(logger)
+library(scales)
+library(ggplot2)
+library(zoo)
+
+forint <- function(x) {
+  dollar(x, prefix = '', suffix = ' HUF')
+}
+
+## ########################################################
+## Loading data
+
+## Read transactions from the DB
+transactions <- db_query('SELECT * FROM transactions', 'remotemysql')
+
+## Prepare daily balance sheets
+balance <- transactions[, .(date = as.Date(date), amount = cumsum(amount)), by = symbol]
+balance
+
+## Transform long table into wide
+balance <- dcast(balance, date ~ symbol)
+balance
+
+## Add missing dates
+dates <- data.table(date = seq(from = Sys.Date() - 30, to = Sys.Date(), by = '1 day'))
+balance <- merge(balance, dates, by = 'date', all.x = TRUE, all.y = TRUE)
+balance
+
+## Fill in missing values between actual balances
+balance <- na.locf(balance)
+
+## Fill in remaining missing values with zero
+balance[is.na(balance)] <- 0
+
+## Transform wide table back to long format
+balance <- melt(balance, id.vars = 'date', variable.name = 'symbol', value.name = 'amount')
+balance
+
+## Get crypt prices
+prices <- rbindlist(lapply(as.character(unique(balance$symbol)), function(s) {
+    binance_klines(paste0(s, 'USDT'), interval = '1d', limit = 30)[
+      , .(date = as.Date(close_time), symbol = s, usdt = close)]
+}))
+balance <- merge(balance, prices, by = c('date', 'symbol'), all.x = TRUE, all.y = FALSE)
+
+## Merge USD/HUF rate
+response <- GET(
+    'https://api.exchangeratesapi.io/history',
+    query = list(start_at = Sys.Date() - 30, end_at = Sys.Date(),
+                 base = 'USD', symbols = 'HUF'))
+exchange_rates <- content(response)$rates
+
+usdhufs <- data.table(
+    date = as.Date(names(exchange_rates)),
+    usdhuf = as.numeric(unlist(exchange_rates)))
+
+setkey(balance, date)
+setkey(usdhufs, date)
+balance <- usdhufs[balance, roll = TRUE]
+
+## compute daily values in HUF
+balance[, value := amount * usdt * usdhuf]
+
+## ########################################################
+## Report
+
+ggplot(balance, aes(date, value, fill = symbol)) +
+    geom_col() +
+    ylab('') + scale_y_continuous(labels = forint) +
+    xlab('') +
+    theme_bw() +
+    ggtitle(
+        'My crypto fortune',
+        subtitle = balance[date == max(date), paste(paste(amount, symbol), collapse = ' + ')])
+```
+
+</details>
 
 ### Take-home assignment
 
