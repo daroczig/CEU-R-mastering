@@ -26,7 +26,7 @@ R packages to be installed:
 
 ## Exercises
 
-### The current price of 0.42 BTC
+### Report on the current price of 0.42 BTC
 
 We have 0.42 Bitcoin. Let's write an R script reporting on the current value of this asset in USD.
 
@@ -53,7 +53,7 @@ coin_prices[symbol == 'BTC', usd * 0.42]
 
 </details>
 
-### The current price of 0.42 BTC in HUF
+### Report on the current price of 0.42 BTC in HUF
 
 Let's do the same report as above, but instead of USD, now let's report in Hungarian Forints.
 
@@ -209,7 +209,7 @@ forint(BITCOINS * btcusd * usdhuf)
 
 </details>
 
-### The price of 0.42 BTC in the past 30 days
+### Report on yhe price of 0.42 BTC in the past 30 days
 
 Let's do the same report as above, but instead of reporting the most recent value of the asset, let's report on the daily values from the past 30 days.
 
@@ -348,7 +348,7 @@ ggplot(balance, aes(date, value)) +
 
 </details>
 
-### The price of 0.42 BTC and 1.2 ETH in the past 30 days
+### Report on the price of 0.42 BTC and 1.2 ETH in the past 30 days
 
 Let's do the same report as above, but now we not only have 0.42 Bitcoin, but 1.2 Ethereum as well.
 
@@ -530,6 +530,140 @@ ggplot(balance, aes(date, value, fill = symbol)) +
     </details>
 
 13. Try suppressing debug log messages in this package by `log_threshold`'s `namespace`
+
+### Report on the price of cryptocurrency assets read from a database
+
+1. Create a new account at https://remotemysql.com
+2. Log in and give a try to PhpMyAdmin
+3. Install `dbr` from GitHub:
+
+    ```r
+    library(devtools)
+    install_github('daroczig/logger')
+    install_github('daroczig/dbr')
+    ```
+
+4. Install `botor` as well to be able to use encrypted credentials (note that this requires you to install Python first and then `pip install boto3` as well):
+
+    ```r
+    install_github('daroczig/botor')
+    ```
+
+5. Set up a YAML file for the database connection, something like:
+
+   ```shell
+   remotemysql:
+     host: remotemysql.com
+     port: 3306
+     dbname: ...
+     user: ...
+     drv: !expr RMySQL::MySQL()
+     password: ...
+   ```
+
+6. Set up `dbr` to use that YAML file:
+
+    ```r
+    options('dbr.db_config_path' = '/path/to/database.yml')
+    ```
+
+7. Create a table for the balances and insert some records:
+
+    ```r
+    library(dbr)
+    db_config('remotemysql')
+    db_query('CREATE TABLE coins (symbol VARCHAR(3) NOT NULL, amount DOUBLE NOT NULL DEFAULT 0)', 'remotemysql')
+    db_query('TRUNCATE TABLE coins', 'remotemysql')
+    db_query('INSERT INTO coins VALUES ("BTC", 0.42)', 'remotemysql')
+    db_query('INSERT INTO coins VALUES ("ETH", 1.2)', 'remotemysql')
+    ```
+
+8. Write the reporting script, something like:
+
+    <details>
+      <summary>Click here for a potential solution ...</summary>
+
+    ```r
+    library(binancer)
+    library(httr)
+    library(data.table)
+    library(logger)
+    library(scales)
+    library(ggplot2)
+
+    forint <- function(x) {
+      dollar(x, prefix = '', suffix = ' HUF')
+    }
+
+    ## ########################################################
+    ## Loading data
+
+    ## Read actual balances from the DB
+    library(dbr)
+    options('dbr.db_config_path' = '/path/to/database.yml')
+    options('dbr.output_format' = 'data.table')
+    balance <- db_query('SELECT * FROM coins', 'remotemysql')
+
+    ## Look up cryptocurrency prices in USD and merge balances
+    library(data.table)
+    balance <- rbindlist(lapply(balance$symbol, function(s) {
+      binance_klines(paste0(s, 'USDT'), interval = '1d', limit = 30)[, .(
+        date = as.Date(close_time),
+        usdt = close,
+        symbol = s,
+        amount = balance[symbol == s, amount]
+      )]
+    }))
+
+    ## USD in HUF
+    response <- GET(
+      'https://api.exchangeratesapi.io/history',
+      query = list(
+        start_at = Sys.Date() - 40,
+        end_at   = Sys.Date(),
+        base     = 'USD',
+        symbols  = 'HUF'
+      ))
+    exchange_rates <- content(response)
+    str(exchange_rates)
+    exchange_rates <- exchange_rates$rates
+
+    usdhufs <- data.table(
+      date = as.Date(names(exchange_rates)),
+      usdhuf = as.numeric(unlist(exchange_rates)))
+    str(usdhufs)
+
+    ## rolling join USD/HUF exchange rate to balances
+    setkey(balance, date)
+    setkey(usdhufs, date)
+    balance <- usdhufs[balance, roll = TRUE] ## DT[i, j, by = ...]
+
+    ## compute daily values in HUF
+    balance[, value := amount * usdt * usdhuf]
+
+    ## ########################################################
+    ## Report
+
+    ggplot(balance, aes(date, value, fill = symbol)) + 
+      geom_col() +
+      xlab('') +
+      ylab('') + 
+      #scale_y_continuous(labels = forint) +
+      theme_bw() +
+      ggtitle(
+        'My crypto fortune',
+        subtitle = balance[date == max(date), paste(paste(amount, symbol), collapse = ' + ')])
+    ```
+    
+    </details>
+
+9. Rerun the above report after inserting two new records to the table:
+
+    ```r
+    db_query("INSERT INTO coins VALUES ('NEO', 100)", 'remotemysql')
+    db_query("INSERT INTO coins VALUES ('LTC', 25)", 'remotemysql')
+    ```
+
 
 ### Take-home assignment
 
