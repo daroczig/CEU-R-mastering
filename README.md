@@ -679,7 +679,7 @@ ggplot(balance, aes(date, value, fill = symbol)) +
 
 ### Report on the price of cryptocurrency assets based on the transaction history read from a database
 
-1. Let's prepare the transaction table:
+Let's prepare the transactions table:
 
     ```r
     library(dbr)
@@ -702,7 +702,7 @@ ggplot(balance, aes(date, value, fill = symbol)) +
     ```
 
 <details>
-  <summary>Click here for a potential solution ...</summary>
+  <summary>Click here for a potential solution for the report ...</summary>
 
 ```r
 library(binancer)
