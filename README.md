@@ -1,5 +1,18 @@
 This is the R script/materials repository of the "[Mastering R Skills](https://courses.ceu.edu/courses/mastering-r-skills)" course in the 2018/2019 Spring term, part of the [MSc in Business Analytics](https://courses.ceu.edu/programs/ms/master-science-business-analytics) at CEU.
 
+* [Syllabus](#syllabus)
+* [Technical Prerequisites](#technical-prerequisites)
+* [Exercises](#exercises)
+   * [Report on the current price of 0.42 BTC](#report-on-the-current-price-of-042-btc)
+   * [Report on the current price of 0.42 BTC in HUF](#report-on-the-current-price-of-042-btc-in-huf)
+   * [Report on yhe price of 0.42 BTC in the past 30 days](#report-on-yhe-price-of-042-btc-in-the-past-30-days)
+   * [Report on the price of 0.42 BTC and 1.2 ETH in the past 30 days](#report-on-the-price-of-042-btc-and-12-eth-in-the-past-30-days)
+   * [Move helpers to a new R package](#move-helpers-to-a-new-r-package)
+   * [Report on the price of cryptocurrency assets read from a database](#report-on-the-price-of-cryptocurrency-assets-read-from-a-database)
+   * [Report on the price of cryptocurrency assets based on the transaction history read from a database](#report-on-the-price-of-cryptocurrency-assets-based-on-the-transaction-history-read-from-a-database)
+* [Take-home assignment](#take-home-assignment)
+* [References](#references)
+
 ## Syllabus
 
 Please find in the `syllabus` folder of this repository.
@@ -773,7 +786,7 @@ ggplot(balance, aes(date, value, fill = symbol)) +
 
 </details>
 
-### Take-home assignment
+## Take-home assignment
 
 You can either work on an actual project outlined below, OR you can decide to skip that task and contribute to open-source R packages and/or projects for you final grade.
 
