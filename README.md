@@ -681,25 +681,25 @@ ggplot(balance, aes(date, value, fill = symbol)) +
 
 Let's prepare the transactions table:
 
-    ```r
-    library(dbr)
-    options('dbr.db_config_path' = '/path/to/database.yml')
-    options('dbr.output_format' = 'data.table')
-    
-    db_query('
-      CREATE TABLE transactions (
-        date TIMESTAMP NOT NULL,
-        symbol VARCHAR(3) NOT NULL,
-        amount DOUBLE NOT NULL DEFAULT 0)',
-      db = 'remotemysql')
+```r
+library(dbr)
+options('dbr.db_config_path' = '/path/to/database.yml')
+options('dbr.output_format' = 'data.table')
 
-    db_query('TRUNCATE TABLE transactions', 'remotemysql')
-    db_query('INSERT INTO transactions VALUES ("2019-01-01 10:42:02", "BTC", 1.42)', 'remotemysql')
-    db_query('INSERT INTO transactions VALUES ("2019-01-01 10:45:20", "ETH", 1.2)', 'remotemysql')
-    db_query('INSERT INTO transactions VALUES ("2019-02-28", "BTC", -1)', 'remotemysql')
-    db_query('INSERT INTO transactions VALUES ("2019-04-13", "NEO", 100)', 'remotemysql')
-    db_query('INSERT INTO transactions VALUES ("2019-04-20 12:12:21", "LTC", 25)', 'remotemysql')
-    ```
+db_query('
+  CREATE TABLE transactions (
+    date TIMESTAMP NOT NULL,
+    symbol VARCHAR(3) NOT NULL,
+    amount DOUBLE NOT NULL DEFAULT 0)',
+  db = 'remotemysql')
+
+db_query('TRUNCATE TABLE transactions', 'remotemysql')
+db_query('INSERT INTO transactions VALUES ("2019-01-01 10:42:02", "BTC", 1.42)', 'remotemysql')
+db_query('INSERT INTO transactions VALUES ("2019-01-01 10:45:20", "ETH", 1.2)', 'remotemysql')
+db_query('INSERT INTO transactions VALUES ("2019-02-28", "BTC", -1)', 'remotemysql')
+db_query('INSERT INTO transactions VALUES ("2019-04-13", "NEO", 100)', 'remotemysql')
+db_query('INSERT INTO transactions VALUES ("2019-04-20 12:12:21", "LTC", 25)', 'remotemysql')
+```
 
 <details>
   <summary>Click here for a potential solution for the report ...</summary>
