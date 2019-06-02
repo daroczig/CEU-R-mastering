@@ -37,7 +37,7 @@ R packages to be installed:
 * `openxlsx`
 * `devtools`
 
-## Exercises
+## API ingest and data transformation exercises
 
 ### Report on the current price of 0.42 BTC
 
@@ -785,6 +785,204 @@ ggplot(balance, aes(date, value, fill = symbol)) +
 ```
 
 </details>
+
+## Reporting exercises
+
+### Connecting to and exploring the SQLite database
+
+Download and extract the database file:
+
+```r
+## download database file
+download.file('http://bit.ly/CEU-R-ecommerce', 'ecommerce.zip', mode = 'wb')
+unzip('ecommerce.zip')
+```
+
+Install the SQLite client on your operating system and then use the `sqlite3 ecommerce.sqlite3` command to enter the command-line SQLite client to browse the database:
+
+```sql
+-- list tables in the database
+.tables
+-- show the structure of the sales table
+.schema sales
+-- show the first 5 rows of the table
+select * from sales limit 5
+-- tweak how the rows are shown
+.headers on
+.mode column
+select * from sales limit 5
+
+-- count number of rows in the table
+SELECT COUNT(*) FROM sales;
+
+-- count number of rows in January 2011 (lack of proper date/time handling in SQLite)
+SELECT COUNT(*)
+FROM sales
+WHERE SUBSTR(InvoiceDate, 7, 4) || SUBSTR(InvoiceDate, 1, 2) || SUBSTR(InvoiceDate, 4, 2)
+      BETWEEN '20110101' AND '20110131'
+
+-- count the number of rows per month
+SELECT
+  SUBSTR(InvoiceDate, 7, 4) || SUBSTR(InvoiceDate, 1, 2) AS month,
+  COUNT(*)
+FROM sales
+GROUP BY month
+ORDER BY month
+```
+
+### Connect to SQLite from R
+
+Create a database config file for the `dbr` package:
+
+```yaml
+
+ecommerce:
+  drv: !expr RSQLite::SQLite()
+  dbname: /path/to/ecommerce.sqlite3
+```
+
+Update your `dbr` settings to use the config file:
+
+```r
+library(dbr)
+options('dbr.db_config_path' = '/path/to/database.yml')
+options('dbr.output_format' = 'data.table')
+
+sales <- db_query('SELECT * FROM sales', 'ecommerce')
+str(sales)
+
+## explore and fix the invoice date column
+sales[, sample(InvoiceDate, 25)]
+sales[, InvoiceDate := as.POSIXct(InvoiceDate, format = '%m/%d/%Y %H:%M')]
+
+## number of items per country
+sales[, .N, by = Country]
+sales[, .N, by = Country][order(-N)]
+```
+
+### Aggregate transaction items into invoice summary
+
+```r
+invoices <- sales[, .(date = min(as.Date(InvoiceDate)),
+                      gbp  = sum(Quantity * UnitPrice)),
+                  by = .(invoice = InvoiceNo, customer = CustomerID, country = Country)]
+
+db_insert(invoices, 'invoices', 'ecommerce')
+```
+
+Check the structure of the newly (and automatically) created table using the command-line SQLite client:
+
+```sql
+.schema invoices
+```
+
+Check the date column after reading back from the database:
+
+```r
+invoices <- db_query('SELECT * FROM invoices', 'ecommerce')
+str(invoices)
+
+invoices[, date := as.Date(date, origin = '1970-01-01')]
+```
+
+### Report the daily revenue in Excel
+
+```r
+revenue <- invoices[, .(revenue = sum(InvoiceValue)), by = floor_date(InvoiceDate, 'day')]
+
+library(openxlsx)
+wb <- createWorkbook()
+sheet <- 'Revenue'
+addWorksheet(wb, sheet)
+writeData(wb, sheet, revenue)
+
+## open for quick check
+openXL(wb)
+
+## write to a file to be sent in an e-mail, uploaded to Slack or as a Google Spreasheet etc
+filename <- tempfile(fileext = '.xlsx')
+saveWorkbook(wb, filename)
+unlink(filename)
+```
+
+Tweak that spreadsheet:
+
+```r
+freezePane(wb, sheet, firstRow = TRUE)
+
+setColWidths(wb, sheet, 1:ncol(revenue), 'auto')
+
+poundStyle <- createStyle(numFmt = '£0,000.00')
+addStyle(wb, sheet = sheet, poundStyle,
+         gridExpand = TRUE, cols = 2, rows = (1:nrow(revenue)) + 1, stack = TRUE)
+         
+conditionalFormatting(wb, sheet, cols = 2,
+                      rows = 2:(nrow(revenue) + 1),
+                      rule = '$B2<66788.35', style = greenStyle)
+
+standardStyle <- createStyle()
+conditionalFormatting(wb, sheet, cols = 2,
+                      rows = 2:(nrow(revenue) + 1),
+                      rule = '$B2<=66788.35', style = standardStyle)
+```
+
+Add a plot:
+
+```r
+addWorksheet(wb, 'Plot')
+
+library(ggplot2)
+ggplot(revenue, aes(floor_date, revenue)) + geom_line() + theme_excel()
+
+insertPlot(wb, 'Plot')
+```
+
+### Report the monthly revenue and daily breakdowns in Excel
+
+```r
+library(lubridate)
+revenue <- invoices[, .(revenue = sum(InvoiceValue)), by = floor_date(InvoiceDate, 'month')]
+
+library(openxlsx)
+wb <- createWorkbook()
+sheet <- 'Summary'
+addWorksheet(wb, sheet)
+writeData(wb, sheet, revenue)
+
+for (month in revenue$floor_date) {
+  revenue <- invoices[floor_date(InvoiceDate, 'month') == month,
+                      .(revenue = sum(InvoiceValue)), by = floor_date(InvoiceDate, 'day')]
+  addWorksheet(wb, as.character(month))
+  writeData(wb, as.character(month), revenue)
+}
+```
+
+### Report on the top 10 customers in a Google Spreadsheet
+
+```r
+library(googlesheets)
+gs_auth()
+
+top10 <- sales[!is.na(CustomerID),
+               .(revenue = sum(UnitPrice * Quantity)), by = CustomerID][order(-revenue)][1:10]
+
+library(openxlsx)
+wb <- createWorkbook()
+sheet <- 'Top Customers'
+addWorksheet(wb, sheet)
+writeData(wb, sheet, top10)
+t <- tempfile(fileext = '.xlsx')
+saveWorkbook(wb, t)
+gs_upload(t, 'top customers')
+
+## instead of top10, let's do top25
+top25 <- sales[!is.na(CustomerID),
+               .(revenue = sum(UnitPrice * Quantity)), by = CustomerID][order(-revenue)][1:25]
+sheet <- gs_key('your.spreadsheet.id')
+for (i in 11:25) {
+  gs_add_row(sheet, input = top25[i])
+}
+```
 
 ## Take-home assignment
 
