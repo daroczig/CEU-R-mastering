@@ -1012,7 +1012,7 @@ If you decide to skip the above described project and would rather contribute to
 * Feel free to contribute simple things first, eg fixing typos or improving documentation, adding examples etc
 * Make sure to check if the project has any contribution guide or similar, also check the previous PRs to get familiar with the process and style
 
-Submission: send link to your R package's GitHub repo or your open-source contributions (PRs) via Moodle until Jun 9, 2019
+Submission: send link to your R package's GitHub repo or your open-source contributions (PRs) via [Moodle](https://ceulearning.ceu.edu/course/view.php?id=9710&section=1) until Jun 9, 2019
 
 ## References
 
