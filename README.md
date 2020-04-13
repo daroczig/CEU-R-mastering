@@ -1,6 +1,6 @@
 This is the R script/materials repository of the "[Mastering R Skills](https://courses.ceu.edu/courses/mastering-r-skills)" course in the 2019/2020 Spring term, part of the [MSc in Business Analytics](https://courses.ceu.edu/programs/ms/master-science-business-analytics) at CEU.
 
-TODO use git
+## Table of Contents
 
 * [Syllabus](#syllabus)
 * [Technical Prerequisites](#technical-prerequisites)
