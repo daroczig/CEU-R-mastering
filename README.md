@@ -38,6 +38,8 @@ R packages to be installed from GitHub via `remotes::install_github`:
 * `daroczig/logger`
 * `daroczig/dbr`
 
+Join the #ba-mr-2019 Slack channel in the `ceu-bizanalytics` Slack group.
+
 ## References
 
 * AWS Console: https://ceu.signin.aws.amazon.com/console
