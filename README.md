@@ -40,6 +40,8 @@ R packages to be installed from GitHub via `remotes::install_github`:
 
 Join the #ba-mr-2019 Slack channel in the `ceu-bizanalytics` Slack group.
 
+If you get stuck, feel free to use the preconfigured, shared RStudio Server at http://mr.ceudata.net (I will share the usernames and passwords at the start of the class).
+
 ## References
 
 * AWS Console: https://ceu.signin.aws.amazon.com/console
