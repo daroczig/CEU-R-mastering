@@ -12,35 +12,35 @@ Please find in the `syllabus` folder of this repository.
 
 ## Technical Prerequisites
 
-Please bring your own laptop and make sure to install R and RStudio **before** attending the first class.
+1. Please bring your own laptop and make sure to install R and RStudio **before** attending the first class.
 
-R packages to be installed from CRAN via `install.packages`:
+    R packages to be installed from CRAN via `install.packages`:
 
-* `data.table`
-* `httr`
-* `jsonlite`
-* `lubridate`
-* `ggplot2`
-* `scales`
-* `zoo`
-* `RMySQL`
-* `RSQLite`
-* `openxlsx`
-* `googlesheets`
-* `devtools`
-* `pander`
-* `logger`
-* `botor` (requires Python and `boto3` Python module)
+    * `data.table`
+    * `httr`
+    * `jsonlite`
+    * `lubridate`
+    * `ggplot2`
+    * `scales`
+    * `zoo`
+    * `RMySQL`
+    * `RSQLite`
+    * `openxlsx`
+    * `googlesheets`
+    * `devtools`
+    * `pander`
+    * `logger`
+    * `botor` (requires Python and `boto3` Python module)
 
-R packages to be installed from GitHub via `remotes::install_github`:
+    R packages to be installed from GitHub via `remotes::install_github`:
 
-* `daroczig/binancer`
-* `daroczig/logger`
-* `daroczig/dbr`
+    * `daroczig/binancer`
+    * `daroczig/logger`
+    * `daroczig/dbr`
 
-Join the #ba-mr-2019 Slack channel in the `ceu-bizanalytics` Slack group.
+    If you get stuck, feel free to use the preconfigured, shared RStudio Server at http://mr.ceudata.net (I will share the usernames and passwords at the start of the class).
 
-If you get stuck, feel free to use the preconfigured, shared RStudio Server at http://mr.ceudata.net (I will share the usernames and passwords at the start of the class).
+2. Join the #ba-mr-2019 Slack channel in the `ceu-bizanalytics` Slack group.
 
 ## References
 
