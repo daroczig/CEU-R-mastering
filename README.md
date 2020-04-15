@@ -4,11 +4,13 @@ This is the R script/materials repository of the "[Mastering R Skills](https://c
 
 * [Syllabus](#syllabus)
 * [Technical Prerequisites](#technical-prerequisites)
-* [References](#references)
 * [API ingest and data transformation exercises](#api-ingest-and-data-transformation-exercises)
    * [Report on the current price of 0.42 BTC](#report-on-the-current-price-of-042-btc)
    * [Report on the current price of 0.42 BTC in HUF](#report-on-the-current-price-of-042-btc-in-huf)
    * [Move helpers to a new R package](#move-helpers-to-a-new-r-package)
+* [Homeworks](#homeworks)
+   * [Week 1](#week-1)
+* [References](#references)
 
 ## Syllabus
 
@@ -391,6 +393,12 @@ assert_number(usdhuf, lower = 250, upper = 500)
 
 log_eval(forint(BITCOINS * btcusdt * usdhuf))
 ```
+
+## Homeworks
+
+### Week 1
+
+Create the `mr` R package described above with the `forint` and `get_bitcoin_price` functions, and push to a new repo in your GitHub account, so that you can install the package on any computer via `remotes::install_github`. Submit the URL to your GitHub repo in Moodle.
 
 ## References
 
