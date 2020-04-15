@@ -63,6 +63,8 @@ Please find in the `syllabus` folder of this repository.
 
 Find more resources in Jenny Bryan's "[Happy Git and GitHub for the useR](http://happygitwithr.com/)" tutorial if in doubt or [contact me](#contact).
 
+## API ingest and data transformation exercises
+
 ### Report on the current price of 0.42 BTC
 
 We have 0.42 Bitcoin. Let's write an R script reporting on the current value of this asset in USD.
