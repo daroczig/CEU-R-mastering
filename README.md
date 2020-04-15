@@ -340,7 +340,7 @@ forint(btcusdt * usdhuf * BITCOINS)
 9. Run `roxygen2` on the package by enabling it in the "Build" menu's "Configure Build Tools", then "Document" it (if there's no such option, probably you need to install the `roxygen2` package first), and make sure to check what changes happened in the `man`, `NAMESPACE` (you might need to delete the original one) and `DESCRIPTION` files. It's also a good idea to automatically run `roxygen2` before each install, so I'd suggests marking that option as well.
 10. Keep committing to the git repo
 11. Delete `hello.R` and rerun `roxygen2` / reinstall the package
-12. Add a new function that gets the most recent price of a Bitcoing in USD with retries:
+12. Add a new function that gets the most recent price of a Bitcoin in USD with retries:
 
     <details>
       <summary><code>converter.R</code></summary>
