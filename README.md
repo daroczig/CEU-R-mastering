@@ -5,6 +5,10 @@ This is the R script/materials repository of the "[Mastering R Skills](https://c
 * [Syllabus](#syllabus)
 * [Technical Prerequisites](#technical-prerequisites)
 * [References](#references)
+* [API ingest and data transformation exercises](#api-ingest-and-data-transformation-exercises)
+   * [Report on the current price of 0.42 BTC](#report-on-the-current-price-of-042-btc)
+   * [Report on the current price of 0.42 BTC in HUF](#report-on-the-current-price-of-042-btc-in-huf)
+   * [Move helpers to a new R package](#move-helpers-to-a-new-r-package)
 
 ## Syllabus
 
@@ -58,12 +62,6 @@ Please find in the `syllabus` folder of this repository.
     Close this window, commit, push changes, all set.
 
 Find more resources in Jenny Bryan's "[Happy Git and GitHub for the useR](http://happygitwithr.com/)" tutorial if in doubt or [contact me](#contact).
-
-* [API ingest and data transformation exercises](#api-ingest-and-data-transformation-exercises)
-   * [Report on the current price of 0.42 BTC](#report-on-the-current-price-of-042-btc)
-   * [Report on the current price of 0.42 BTC in HUF](#report-on-the-current-price-of-042-btc-in-huf)
-   * [Move helpers to a new R package](#move-helpers-to-a-new-r-package)
-
 
 ### Report on the current price of 0.42 BTC
 
