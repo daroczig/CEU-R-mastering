@@ -354,7 +354,9 @@ forint(btcusdt * usdhuf * BITCOINS)
     #' @importFrom binancer binance_coins_prices
     get_bitcoin_price <- function(retried = 0) {
       tryCatch(
-        binance_coins_prices()[symbol == 'BTC', usd],
+        ## not using data.table syntax here and falling back to data.frame
+        ## so that this could run on systems wihtout data.table as well
+        subset(binance_coins_prices(), symbol == 'BTC')$usd,
         error = function(e) {
           ## exponential backoff retries
           Sys.sleep(1 + retried^2)
