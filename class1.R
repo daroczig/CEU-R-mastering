@@ -5,7 +5,7 @@ library(logger)
 BITCOINS <- 0.42
 log_info('Number of Bitcoins: {BITCOINS}')
 
-# get prices from Binance
+# get prices from Binance - if there is an error: use tryCatch
 prices <- binance_ticker_all_prices()
 prices
 
@@ -13,6 +13,13 @@ prices
 btc_usd <- prices[from == 'BTC' & to == 'USDT', price]
 ex1 <- btc_usd * BITCOINS
 log_info('BTCUSDT: {btc_usd}')
+
+# tryCatch
+get_bitcoin_price <- function() {
+  tryCatch(
+  binance_coins_prices()[symbol == 'BTC', usd],
+                       error = function(e) get_bitcoin_price())
+}
 
 # how to get currency rates?
 readLines('https://api.exchangeratesapi.io/latest?base=USD')
