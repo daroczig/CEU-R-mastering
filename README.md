@@ -259,6 +259,8 @@ assert_number(usdhuf, lower = 250, upper = 500)
 log_info('{BITCOINS} Bitcoins now worth {round(btcusdt * usdhuf * BITCOINS)} HUF')
 ```
 
+</details>
+
 <details>
   <summary>Click here for a potential solution ... with better currency formatter</summary>
 
