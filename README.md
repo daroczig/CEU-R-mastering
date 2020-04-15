@@ -398,4 +398,6 @@ log_eval(forint(BITCOINS * btcusdt * usdhuf))
 * Free MySQL database: https://remotemysql.com
 * "Writing R Extensions" docs: https://cran.r-project.org/doc/manuals/r-release/R-exts.html
 * Hadley Wickham's "R packages" book: http://r-pkgs.had.co.nz
+* Hadley Wickham's "Advanced R" book (1st edition): http://adv-r.had.co.nz/
+* The `tidyverse` style guide: https://style.tidyverse.org/
 * `pkgdown` package: https://pkgdown.r-lib.org/index.html
