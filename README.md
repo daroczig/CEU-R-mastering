@@ -359,6 +359,8 @@ forint(btcusdt * usdhuf * BITCOINS)
     Imports: scales
     ```
 
+    </details>
+
     <details>
       <summary><code>NAMESPACE</code></summary>
 
@@ -368,6 +370,8 @@ forint(btcusdt * usdhuf * BITCOINS)
     export(forint)
     importFrom(scales,dollar)
     ```
+
+    </details>
 
 10. Keep committing to the git repo
 11. Delete `hello.R` and rerun `roxygen2` / reinstall the package
