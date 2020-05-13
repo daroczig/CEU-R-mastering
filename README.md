@@ -929,3 +929,4 @@ Don't forget about documenting the function!
 * Hadley Wickham's "Advanced R" book (1st edition): http://adv-r.had.co.nz/
 * The `tidyverse` style guide: https://style.tidyverse.org/
 * `pkgdown` package: https://pkgdown.r-lib.org/index.html
+* `dbr` package: https://github.com/daroczig/dbr
