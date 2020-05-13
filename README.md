@@ -8,6 +8,11 @@ This is the R script/materials repository of the "[Mastering R Skills](https://c
    * [Report on the current price of 0.42 BTC](#report-on-the-current-price-of-042-btc)
    * [Report on the current price of 0.42 BTC in HUF](#report-on-the-current-price-of-042-btc-in-huf)
    * [Move helpers to a new R package](#move-helpers-to-a-new-r-package)
+   * [Report on the price of 0.42 BTC in the past 30 days](#report-on-the-price-of-042-btc-in-the-past-30-days)
+   * [Report on the price of 0.42 BTC and 1.2 ETH in the past 30 days](#report-on-the-price-of-042-btc-and-12-eth-in-the-past-30-days)
+   * [Move helpers to a new R package](#move-helpers-to-a-new-r-package)
+   * [Report on the price of cryptocurrency assets read from a database](#report-on-the-price-of-cryptocurrency-assets-read-from-a-database)
+   * [Report on the price of cryptocurrency assets based on the transaction history read from a database](#report-on-the-price-of-cryptocurrency-assets-based-on-the-transaction-history-read-from-a-database)
 * [Homeworks](#homeworks)
    * [Week 1](#week-1)
    * [Week 2](#week-2)
@@ -427,6 +432,472 @@ assert_number(usdhuf, lower = 250, upper = 500)
 
 log_eval(forint(BITCOINS * btcusdt * usdhuf))
 ```
+
+### Report on the price of 0.42 BTC in the past 30 days
+
+Let's do the same report as above, but instead of reporting the most recent value of the asset, let's report on the daily values from the past 30 days.
+
+<details>
+  <summary>Click here for a potential solution ... with fixed USD/HUF exchange rate</summary>
+
+```r
+library(binancer)
+library(httr)
+library(data.table)
+library(logger)
+library(ggplot2)
+library(mr)
+
+## ########################################################
+## CONSTANTS
+
+BITCOINS <- 0.42
+
+## ########################################################
+## Loading data
+
+## USD in HUF
+usdhuf <- fromJSON('https://api.exchangeratesapi.io/latest?base=USD&symbols=HUF')$rates$HUF
+log_info('The current USD price is {forint(usdhuf)}')
+
+## Bitcoin price in USD
+btcusdt <- binance_klines('BTCUSDT', interval = '1d', limit = 30)
+str(btcusdt)
+
+balance <- btcusdt[, .(date = as.Date(close_time), btcusd = close)]
+str(balance)
+
+balance[, btchuf := btcusd * usdhuf]
+balance[, btc := BITCOINS]
+balance[, value := btc * btchuf]
+str(balance)
+
+## ########################################################
+## Report
+
+ggplot(balance, aes(date, value)) +
+  geom_line() +
+  xlab('') +
+  ylab('') +
+  scale_y_continuous(labels = forint) +
+  theme_bw() +
+  ggtitle('My crypto fortune',
+          subtitle = paste(BITCOINS, 'BTC'))
+
+```
+
+</details>
+
+<details>
+  <summary>Click here for a potential solution ... with daily corrected USD/HUF exchange rate</summary>
+
+```r
+library(binancer)
+library(httr)
+library(data.table)
+library(logger)
+library(scales)
+library(ggplot2)
+library(mr)
+
+## ########################################################
+## CONSTANTS
+
+BITCOINS <- 0.42
+
+## ########################################################
+## Loading data
+
+## USD in HUF
+usdhuf <- fromJSON('https://api.exchangeratesapi.io/latest?base=USD&symbols=HUF')$rates$HUF
+
+## try with a single date?
+fromJSON('https://api.exchangeratesapi.io/2020-05-01?base=USD&symbols=HUF')
+## no, it's just a single day
+# fromJSON('https://api.exchangeratesapi.io/history?start_at=2020-05-01&base=USD&symbols=HUF')
+## need end
+fromJSON('https://api.exchangeratesapi.io/history?start_at=2020-05-01&end_at=2020-05-30&base=USD&symbols=HUF')
+## we can do a much better job!
+
+library(httr)
+response <- GET(
+  'https://api.exchangeratesapi.io/history',
+  query = list(
+    start_at = Sys.Date() - 30,
+    end_at   = Sys.Date(),
+    base     = 'USD',
+    symbols  = 'HUF'
+  ))
+exchange_rates <- content(response)
+str(exchange_rates)
+exchange_rates <- exchange_rates$rates
+
+library(data.table)
+usdhuf <- data.table(
+  date = as.Date(names(exchange_rates)),
+  usdhuf = as.numeric(unlist(exchange_rates)))
+str(usdhuf)
+
+## Bitcoin price in USD
+btcusdt <- binance_klines('BTCUSDT', interval = '1d', limit = 30)
+str(btcusdt)
+
+balance <- btcusdt[, .(date = as.Date(close_time), btcusd = close)]
+str(balance)
+str(usdhuf)
+
+merge(balance, usdhuf, by = 'date')
+## oh no, missing records??
+
+## rolling join to look up the most recently available USD/HUF rate
+## (published on business days) for each calendar day
+setkey(balance, date)
+setkey(usdhuf, date)
+balance <- usdhuf[balance, roll = TRUE]
+str(balance)
+
+balance[, btchuf := btcusd * usdhuf]
+balance[, btc := BITCOINS]
+balance[, value := btc * btchuf]
+str(balance)
+
+## ########################################################
+## Report
+
+ggplot(balance, aes(date, value)) +
+  geom_line() +
+  xlab('') +
+  ylab('') +
+  scale_y_continuous(labels = forint) +
+  theme_bw() +
+  ggtitle('My crypto fortune',
+          subtitle = paste(BITCOINS, 'BTC'))
+```
+
+</details>
+
+### Report on the price of 0.42 BTC and 1.2 ETH in the past 30 days
+
+Let's do the same report as above, but now we not only have 0.42 Bitcoin, but 1.2 Ethereum as well.
+
+<details>
+  <summary>Click here for a potential solution ...</summary>
+
+```r
+library(binancer)
+library(httr)
+library(data.table)
+library(logger)
+library(scales)
+library(ggplot2)
+library(mr)
+
+## ########################################################
+## CONSTANTS
+
+BITCOINS  <- 0.42
+ETHEREUMS <- 1.2
+
+## ########################################################
+## Loading data
+
+## USD in HUF
+exchange_rates <- content(GET(
+  'https://api.exchangeratesapi.io/history',
+  query = list(
+    start_at = Sys.Date() - 40,
+    end_at   = Sys.Date(),
+    base     = 'USD',
+    symbols  = 'HUF'
+  )))$rates
+
+usdhuf <- data.table(
+  date = as.Date(names(exchange_rates)),
+  usdhuf = as.numeric(unlist(exchange_rates)))
+
+## Cryptocurrency prices in USD
+btcusdt <- binance_klines('BTCUSDT', interval = '1d', limit = 30)
+ethusdt <- binance_klines('ETHUSDT', interval = '1d', limit = 30)
+coinusdt <- rbind(btcusdt, ethusdt)
+str(coinusdt)
+## oh no, how to keep the symbol??
+balance <- coinusdt[, .(date = as.Date(close_time), btcusd = close, symbol = ???)]
+
+## DRY (don't repeat yourself)
+balance <- rbindlist(lapply(c('BTC', 'ETH'), function(s) {
+  binance_klines(paste0(s, 'USDT'), interval = '1d', limit = 30)[, .(
+    date = as.Date(close_time),
+    usdt = close,
+    symbol = s
+  )]
+}))
+
+balance[, amount := switch(
+  symbol,
+  'BTC' = BITCOINS,
+  'ETH' = ETHEREUMS,
+  stop('Unsupported coin')),
+  by = symbol]
+str(balance)
+
+## rolling join
+setkey(balance, date)
+setkey(usdhuf, date)
+balance <- usdhuf[balance, roll = TRUE]
+
+str(balance)
+
+balance[, value := amount * usdt * usdhuf]
+str(balance)
+
+## ########################################################
+## Report
+
+ggplot(balance, aes(date, value, fill = symbol)) +
+  geom_col() +
+  xlab('') +
+  ylab('') +
+  scale_y_continuous(labels = forint) +
+  theme_bw() +
+  ggtitle(
+    'My crypto fortune',
+    subtitle = balance[date == max(date), paste(paste(amount, symbol), collapse = ' + ')])
+```
+
+</details>
+
+
+### Report on the price of cryptocurrency assets read from a database
+
+1. Create a new MySQL account and database at some free service provider (eg remotemysql.com or freemysqlhosting.net)
+2. Log in and give a try to PhpMyAdmin
+3. 💪 Install `dbr` from GitHub:
+
+    ```r
+    library(devtools)
+    install_github('daroczig/logger')
+    install_github('daroczig/dbr')
+    ```
+
+4. Install `botor` as well to be able to use encrypted credentials (note that this requires you to install Python first and then `pip install boto3` as well):
+
+    ```r
+    install_github('daroczig/botor')
+    ```
+
+5. Set up a YAML file (menu: new file/text file, save as `databases.yml`) for the database connection, something like:
+
+   ```shell
+   remotemysql:
+     host: remotemysql.com
+     port: 3306
+     dbname: ...
+     user: ...
+     drv: !expr RMySQL::MySQL()
+     password: ...
+   ```
+
+6. Set up `dbr` to use that YAML file:
+
+    ```r
+    options('dbr.db_config_path' = '/path/to/databases.yml')
+    ```
+
+7. Create a table for the balances and insert some records:
+
+    ```r
+    library(dbr)
+    db_config('remotemysql')
+    db_query('CREATE TABLE coins (symbol VARCHAR(3) NOT NULL, amount DOUBLE NOT NULL DEFAULT 0)', 'remotemysql')
+    db_query('TRUNCATE TABLE coins', 'remotemysql')
+    db_query('INSERT INTO coins VALUES ("BTC", 0.42)', 'remotemysql')
+    db_query('INSERT INTO coins VALUES ("ETH", 1.2)', 'remotemysql')
+    ```
+
+8. Write the reporting script, something like:
+
+    <details>
+      <summary>Click here for a potential solution ...</summary>
+
+    ```r
+    library(binancer)
+    library(httr)
+    library(data.table)
+    library(logger)
+    library(scales)
+    library(ggplot2)
+    library(mr)
+
+    library(dbr)
+    options('dbr.db_config_path' = '/path/to/databases.yml')
+    options('dbr.output_format' = 'data.table')
+
+    ## ########################################################
+    ## Loading data
+
+    ## Read actual balances from the DB
+    balance <- db_query('SELECT * FROM coins', 'remotemysql')
+
+    ## Look up cryptocurrency prices in USD and merge balances
+    balance <- rbindlist(lapply(balance$symbol, function(s) {
+      binance_klines(paste0(s, 'USDT'), interval = '1d', limit = 30)[, .(
+        date = as.Date(close_time),
+        usdt = close,
+        symbol = s,
+        amount = balance[symbol == s, amount]
+      )]
+    }))
+
+    ## USD in HUF
+    exchange_rates <- content(GET(
+      'https://api.exchangeratesapi.io/history',
+      query = list(
+        start_at = Sys.Date() - 40,
+        end_at   = Sys.Date(),
+        base     = 'USD',
+        symbols  = 'HUF'
+      )))$rates
+    usdhufs <- data.table(
+      date = as.Date(names(exchange_rates)),
+      usdhuf = as.numeric(unlist(exchange_rates)))
+
+    ## rolling join USD/HUF exchange rate to balances
+    setkey(balance, date)
+    setkey(usdhufs, date)
+    balance <- usdhufs[balance, roll = TRUE] ## DT[i, j, by = ...]
+
+    ## compute daily values in HUF
+    balance[, value := amount * usdt * usdhuf]
+
+    ## ########################################################
+    ## Report
+
+    ggplot(balance, aes(date, value, fill = symbol)) +
+      geom_col() +
+      xlab('') +
+      ylab('') +
+      #scale_y_continuous(labels = forint) +
+      theme_bw() +
+      ggtitle(
+        'My crypto fortune',
+        subtitle = balance[date == max(date), paste(paste(amount, symbol), collapse = ' + ')])
+    ```
+
+    </details>
+
+9. Rerun the above report after inserting two new records to the table:
+
+    ```r
+    db_query("INSERT INTO coins VALUES ('NEO', 100)", 'remotemysql')
+    db_query("INSERT INTO coins VALUES ('LTC', 25)", 'remotemysql')
+    ```
+
+### Report on the price of cryptocurrency assets based on the transaction history read from a database
+
+Let's prepare the transactions table:
+
+```r
+library(dbr)
+options('dbr.db_config_path' = '/path/to/database.yml')
+options('dbr.output_format' = 'data.table')
+
+db_query('
+  CREATE TABLE transactions (
+    date TIMESTAMP NOT NULL,
+    symbol VARCHAR(3) NOT NULL,
+    amount DOUBLE NOT NULL DEFAULT 0)',
+  db = 'remotemysql')
+
+db_query('TRUNCATE TABLE transactions', 'remotemysql')
+db_query('INSERT INTO transactions VALUES ("2020-01-01 10:42:02", "BTC", 1.42)', 'remotemysql')
+db_query('INSERT INTO transactions VALUES ("2020-01-01 10:45:20", "ETH", 1.2)', 'remotemysql')
+db_query('INSERT INTO transactions VALUES ("2020-02-28", "BTC", -1)', 'remotemysql')
+db_query('INSERT INTO transactions VALUES ("2020-04-13", "NEO", 100)', 'remotemysql')
+db_query('INSERT INTO transactions VALUES ("2020-04-20 12:12:21", "LTC", 25)', 'remotemysql')
+```
+
+<details>
+  <summary>Click here for a potential solution for the report ...</summary>
+
+```r
+library(binancer)
+library(httr)
+library(data.table)
+library(logger)
+library(scales)
+library(ggplot2)
+library(zoo)
+library(mr)
+
+## ########################################################
+## Loading data
+
+## Read transactions from the DB
+transactions <- db_query('SELECT * FROM transactions', 'remotemysql')
+
+## Prepare daily balance sheets
+balance <- transactions[, .(date = as.Date(date), amount = cumsum(amount)), by = symbol]
+balance
+
+## Transform long table into wide
+balance <- dcast(balance, date ~ symbol)
+balance
+
+## Add missing dates
+dates <- data.table(date = seq(from = Sys.Date() - 30, to = Sys.Date(), by = '1 day'))
+balance <- merge(balance, dates, by = 'date', all.x = TRUE, all.y = TRUE)
+balance
+
+## Fill in missing values between actual balances
+balance <- na.locf(balance)
+
+## Fill in remaining missing values with zero
+balance[is.na(balance)] <- 0
+
+## Transform wide table back to long format
+balance <- melt(balance, id.vars = 'date', variable.name = 'symbol', value.name = 'amount')
+balance
+
+## Get crypt prices
+prices <- rbindlist(lapply(as.character(unique(balance$symbol)), function(s) {
+    binance_klines(paste0(s, 'USDT'), interval = '1d', limit = 30)[
+      , .(date = as.Date(close_time), symbol = s, usdt = close)]
+}))
+balance <- merge(balance, prices, by = c('date', 'symbol'), all.x = TRUE, all.y = FALSE)
+
+## Merge USD/HUF rate
+response <- GET(
+    'https://api.exchangeratesapi.io/history',
+    query = list(start_at = Sys.Date() - 30, end_at = Sys.Date(),
+                 base = 'USD', symbols = 'HUF'))
+exchange_rates <- content(response)$rates
+
+usdhufs <- data.table(
+    date = as.Date(names(exchange_rates)),
+    usdhuf = as.numeric(unlist(exchange_rates)))
+
+setkey(balance, date)
+setkey(usdhufs, date)
+balance <- usdhufs[balance, roll = TRUE]
+
+## compute daily values in HUF
+balance[, value := amount * usdt * usdhuf]
+
+## ########################################################
+## Report
+
+ggplot(balance, aes(date, value, fill = symbol)) +
+    geom_col() +
+    ylab('') + scale_y_continuous(labels = forint) +
+    xlab('') +
+    theme_bw() +
+    ggtitle(
+        'My crypto fortune',
+        subtitle = balance[date == max(date), paste(paste(amount, symbol), collapse = ' + ')])
+```
+
+</details>
+
 
 ## Homeworks
 
