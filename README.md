@@ -906,7 +906,7 @@ Create the `mr` R package described above with the `forint` and `get_bitcoin_pri
 
 ### Week 2
 
-Add a new function to your `mr` package that queries historical exchange rates for any currency (so configurable `symbol` and `base` currency) for the past number of `days`. Example run:
+Create a new git branch in your (above created) git repo for the `mr` package, and introduce a new function there that queries historical exchange rates for any currency (so configurable `symbol` and `base` currency) for the past number of `days`. Example run:
 
 ```r
 > convert_currency('EUR', 'USD', 2)
@@ -916,6 +916,8 @@ Add a new function to your `mr` package that queries historical exchange rates f
 ```
 
 Don't forget about documenting the function!
+
+Then push your changes (either in one or multiple commits) as a new branch to GitHub and create a pull request to merge to your `master` branch. Share the URL to your pull request on Moodle!
 
 ## References
 
