@@ -10,7 +10,6 @@ This is the R script/materials repository of the "[Mastering R Skills](https://c
    * [Move helpers to a new R package](#move-helpers-to-a-new-r-package)
    * [Report on the price of 0.42 BTC in the past 30 days](#report-on-the-price-of-042-btc-in-the-past-30-days)
    * [Report on the price of 0.42 BTC and 1.2 ETH in the past 30 days](#report-on-the-price-of-042-btc-and-12-eth-in-the-past-30-days)
-   * [Move helpers to a new R package](#move-helpers-to-a-new-r-package)
    * [Report on the price of cryptocurrency assets read from a database](#report-on-the-price-of-cryptocurrency-assets-read-from-a-database)
    * [Report on the price of cryptocurrency assets based on the transaction history read from a database](#report-on-the-price-of-cryptocurrency-assets-based-on-the-transaction-history-read-from-a-database)
 * [Homeworks](#homeworks)
