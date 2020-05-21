@@ -23,6 +23,7 @@ This is the R script/materials repository of the "[Mastering R Skills](https://c
 * [Homeworks](#homeworks)
    * [Week 1](#week-1)
    * [Week 2](#week-2)
+* [Home assignment](#home-assignment)
 * [References](#references)
 
 ## Syllabus
@@ -1192,6 +1193,21 @@ Create a new git branch in your (above created) git repo for the `mr` package, a
 Don't forget about documenting the function!
 
 Then push your changes (either in one or multiple commits) as a new branch to GitHub and create a pull request to merge to your `master` branch. Share the URL to your pull request on Moodle!
+
+## Home assignment
+
+For pass:
+
+1. Merge your PR from the second week's homework!
+2. Read the "Testing" chapter from Hadley's "R Packages" book at http://r-pkgs.had.co.nz/tests.html
+3. Create a new branch in your R package, write a unit test for the `forint` function to make sure that `forint(42)` returns `42 HUF`, open a pull request and share the PR URL on Moodle!
+
+For grade:
+
+4. Set up CI to automatically run your unit tests when pushing to GitHub (see https://r-pkgs.org/r-cmd-check.html)
+5. Set up a webpage for your package using `pkgdown` and GitHub Pages (see https://pkgdown.r-lib.org)
+
+Deadline: June 14, 2020 (midnight by CET)
 
 ## References
 
