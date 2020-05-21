@@ -12,6 +12,14 @@ This is the R script/materials repository of the "[Mastering R Skills](https://c
    * [Report on the price of 0.42 BTC and 1.2 ETH in the past 30 days](#report-on-the-price-of-042-btc-and-12-eth-in-the-past-30-days)
    * [Report on the price of cryptocurrency assets read from a database](#report-on-the-price-of-cryptocurrency-assets-read-from-a-database)
    * [Report on the price of cryptocurrency assets based on the transaction history read from a database](#report-on-the-price-of-cryptocurrency-assets-based-on-the-transaction-history-read-from-a-database)
+* [Profiling, benchmarks](#profiling-benchmarks)
+* [Reporting exercises](#reporting-exercises)
+   * [Connecting to and exploring the SQLite database](#connecting-to-and-exploring-the-sqlite-database)
+   * [Connect to SQLite from R](#connect-to-sqlite-from-r)
+   * [Aggregate transaction items into invoice summary](#aggregate-transaction-items-into-invoice-summary)
+   * [Report the daily revenue in Excel](#report-the-daily-revenue-in-excel)
+   * [Report the monthly revenue and daily breakdowns in Excel](#report-the-monthly-revenue-and-daily-breakdowns-in-excel)
+   * [Report on the top 10 customers in a Google Spreadsheet](#report-on-the-top-10-customers-in-a-google-spreadsheet)
 * [Homeworks](#homeworks)
    * [Week 1](#week-1)
    * [Week 2](#week-2)
@@ -897,6 +905,272 @@ ggplot(balance, aes(date, value, fill = symbol)) +
 
 </details>
 
+## Profiling, benchmarks
+
+Breaking down the a single run of the `get_bitcoin_price` function to see which component is slow and taking up resources:
+
+```r
+library(profvis)
+profvis({
+  get_bitcoin_price()
+})
+```
+
+A more realistic example: is `ggplot2` indeed slow when generating scatter plots on a dataset with larger number of observations?
+
+```r
+profvis({
+  library(ggplot2)
+  x <- ggplot(diamonds, aes(price, carat)) + geom_point()
+  print(x)
+})
+```
+
+Pipe VS Bracket:
+
+```r
+library(data.table)
+library(dplyr)
+dt <- data.table(diamonds)
+profvis({
+  dt[, sum(carat), by = color][order(color)]
+  group_by(dt, color) %>% summarise(price = sum(carat))
+})
+## run too quickly for profiling ...
+
+library(microbenchmark)
+microbenchmark(
+  aggregate(dt$carat, by = list(dt$color), FUN = sum),
+  dt[, sum(carat), by = color][order(color)],
+  group_by(dt, color) %>% summarise(price = sum(carat)),
+  times = 100)
+```
+
+Also check out `dtplyr`.
+
+## Reporting exercises
+
+### Connecting to and exploring the SQLite database
+
+Download and extract the database file:
+
+```r
+## download database file
+download.file('http://bit.ly/CEU-R-ecommerce', 'ecommerce.zip', mode = 'wb')
+unzip('ecommerce.zip')
+```
+
+Install the SQLite client on your operating system and then use the `sqlite3 ecommerce.sqlite3` command to enter the command-line SQLite client to browse the database:
+
+```sql
+-- list tables in the database
+.tables
+-- show the structure of the sales table
+.schema sales
+-- show the first 5 rows of the table
+select * from sales limit 5
+-- tweak how the rows are shown
+.headers on
+.mode column
+select * from sales limit 5
+
+-- count number of rows in the table
+SELECT COUNT(*) FROM sales;
+
+-- count number of rows in January 2011 (lack of proper date/time handling in SQLite)
+SELECT COUNT(*)
+FROM sales
+WHERE SUBSTR(InvoiceDate, 7, 4) || SUBSTR(InvoiceDate, 1, 2) || SUBSTR(InvoiceDate, 4, 2)
+      BETWEEN '20110101' AND '20110131'
+
+-- check on the date format
+SELECT InvoiceDate FROM sales ORDER BY random() LIMIT 25;
+
+-- count the number of rows per month
+SELECT
+  SUBSTR(InvoiceDate, 7, 4) || SUBSTR(InvoiceDate, 1, 2) AS month,
+  COUNT(*)
+FROM sales
+GROUP BY month
+ORDER BY month;
+```
+
+Let's switch to R!
+
+### Connect to SQLite from R
+
+Create a database config file for the `dbr` package:
+
+```yaml
+ecommerce:
+  drv: !expr RSQLite::SQLite()
+  dbname: /path/to/ecommerce.sqlite3
+```
+
+Update your `dbr` settings to use the config file:
+
+```r
+library(dbr)
+options('dbr.db_config_path' = '/path/to/database.yml')
+options('dbr.output_format' = 'data.table')
+
+sales <- db_query('SELECT * FROM sales', 'ecommerce')
+str(sales)
+
+## explore and fix the invoice date column
+sales[, sample(InvoiceDate, 25)]
+sales[, InvoiceDate := as.POSIXct(InvoiceDate, format = '%m/%d/%Y %H:%M')]
+
+## number of sales per month like in SQL
+library(lubridate)
+sales[, .N, by = month(InvoiceDate)]
+sales[, .N, by = year(InvoiceDate)]
+sales[, .N, by = paste(year(InvoiceDate), month(InvoiceDate))]
+# slow
+sales[, .N, by = as.character(InvoiceDate, format = '%Y %m')]
+# smart
+sales[, .N, by = floor_date(InvoiceDate, 'month')]
+
+## number of items per country
+sales[, .N, by = Country]
+sales[, .N, by = Country][order(-N)]
+```
+
+### Aggregate transaction items into invoice summary
+
+```r
+invoices <- sales[, .(date = min(as.Date(InvoiceDate)),
+                      value  = sum(Quantity * UnitPrice)),
+                  by = .(invoice = InvoiceNo, customer = CustomerID, country = Country)]
+
+db_insert(invoices, 'invoices', 'ecommerce')
+```
+
+Check the structure of the newly (and automatically) created table using the command-line SQLite client:
+
+```sql
+.schema invoices
+```
+
+Check the date column after reading back from the database:
+
+```r
+invoices <- db_query('SELECT * FROM invoices', 'ecommerce')
+str(invoices)
+
+invoices[, date := as.Date(date, origin = '1970-01-01')]
+```
+
+### Report the daily revenue in Excel
+
+```r
+revenue <- invoices[, .(revenue = sum(value)), by = date]
+
+library(openxlsx)
+wb <- createWorkbook()
+sheet <- 'Revenue'
+addWorksheet(wb, sheet)
+writeData(wb, sheet, revenue)
+
+## open for quick check
+openXL(wb)
+
+## write to a file to be sent in an e-mail, uploaded to Slack or as a Google Spreasheet etc
+filename <- tempfile(fileext = '.xlsx')
+saveWorkbook(wb, filename)
+unlink(filename)
+
+## static file name
+filename <- 'report.xlsx'
+saveWorkbook(wb, filename)
+```
+
+Tweak that spreadsheet:
+
+```r
+freezePane(wb, sheet, firstRow = TRUE)
+
+setColWidths(wb, sheet, 1:ncol(revenue), 'auto')
+
+poundStyle <- createStyle(numFmt = '£0,000.00')
+addStyle(wb, sheet = sheet, poundStyle,
+         gridExpand = TRUE, cols = 2, rows = (1:nrow(revenue)) + 1, stack = TRUE)
+
+conditionalFormatting(wb, sheet, cols = 2,
+                      rows = 2:(nrow(revenue) + 1),
+                      rule = '$B2<66788.35', style = greenStyle)
+
+standardStyle <- createStyle()
+conditionalFormatting(wb, sheet, cols = 2,
+                      rows = 2:(nrow(revenue) + 1),
+                      rule = '$B2<=66788.35', style = standardStyle)
+```
+
+Add a plot:
+
+```r
+addWorksheet(wb, 'Plot')
+
+library(ggplot2)
+library(ggthemes)
+ggplot(revenue, aes(date, revenue)) + geom_line() + theme_excel()
+
+insertPlot(wb, 'Plot')
+
+saveWorkbook(wb, filename)
+saveWorkbook(wb, filename,  overwrite = TRUE)
+```
+
+### Report the monthly revenue and daily breakdowns in Excel
+
+```r
+library(lubridate)
+monthly <- invoices[, .(value = sum(value)), by = .(month = floor_date(date, 'month'))]
+
+library(openxlsx)
+wb <- createWorkbook()
+sheet <- 'Summary'
+addWorksheet(wb, sheet)
+writeData(wb, sheet, monthly)
+
+for (month in monthly$month) {
+  revenue <- invoices[floor_date(date, 'month') == month,
+                      .(revenue = sum(value)), by = date]
+  addWorksheet(wb, as.character(month))
+  writeData(wb, as.character(month), revenue)
+}
+
+saveWorkbook(wb, 'monthly-report.xlsx')
+```
+
+### Report on the top 10 customers in a Google Spreadsheet
+
+```r
+top10 <- sales[!is.na(CustomerID),
+               .(revenue = sum(UnitPrice * Quantity)), by = CustomerID][order(-revenue)][1:10]
+
+library(openxlsx)
+wb <- createWorkbook()
+sheet <- 'Top Customers'
+addWorksheet(wb, sheet)
+writeData(wb, sheet, top10)
+t <- tempfile(fileext = '.xlsx')
+saveWorkbook(wb, t)
+
+## upload file
+library(googledrive)
+drive_auth()
+drive_update(media = t, file = 'top customers')
+
+## instead of top10, let's do top25 ... so appending a few rows to an already existing spreadsheet
+top25 <- sales[!is.na(CustomerID),
+               .(revenue = sum(UnitPrice * Quantity)), by = CustomerID][order(-revenue)][1:25]
+library(googlesheets4)
+gs4_auth()
+for (i in 11:25) {
+  sheet_append('your.spreadsheet.id', data = top25[i])
+}
+```
 
 ## Homeworks
 
