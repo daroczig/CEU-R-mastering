@@ -44,7 +44,7 @@ Please find in the `syllabus` folder of this repository.
 
     If you get stuck, feel free to use the preconfigured, shared RStudio Server at http://mr.ceudata.net (I will share the usernames and passwords at the start of the class). In such case, you can skip all the steps prefixed with "💪" as the server already have that configured.
 
-2. Join the #ba-mr-2019 Slack channel in the `ceu-bizanalytics` Slack group.
+2. Join the #ba-mastering-4-2020 Slack channel in the `ceu-bizanalytics` Slack group.
 3. If you do not already have a GitHub account, create one
 4. Create a new GitHub repository called `mastering-r`
 5. 💪 Install `git` from https://git-scm.com/
