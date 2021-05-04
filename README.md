@@ -68,12 +68,12 @@ To be uploaded after each class,
 ## References
 
 * AWS Console: https://ceu.signin.aws.amazon.com/console
-* Binance (cryptocurrency exchange) API: https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md (R implementation available at https://github.com/daroczig/binancer)
-* Foreign exchange rates API, eg https://exchangeratesapi.io
-* Free MySQL database: https://remotemysql.com
+* Binance (cryptocurrency exchange) API: https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md (R implementation available at https://github.com/daroczig/binancer)
+* Foreign exchange rates API, eg https://exchangerate.host
 * "Writing R Extensions" docs: https://cran.r-project.org/doc/manuals/r-release/R-exts.html
 * Hadley Wickham's "R packages" book: http://r-pkgs.had.co.nz
 * Hadley Wickham's "Advanced R" book (1st edition): http://adv-r.had.co.nz/
+* R package tests with GitHub Actions instead of Travis: https://github.com/r-lib/actions/tree/master/examples#quickstart-ci-workflow
 * The `tidyverse` style guide: https://style.tidyverse.org/
 * `pkgdown` package: https://pkgdown.r-lib.org/index.html
 * `dbr` package: https://github.com/daroczig/dbr
