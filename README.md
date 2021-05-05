@@ -12,7 +12,7 @@ This is the R script/materials repository of the "[Mastering R Skills](https://c
      * [Report on the current price of 0.42 BTC](#report-on-the-current-price-of-042-btc)
      * [Report on the current price of 0.42 BTC in HUF](#report-on-the-current-price-of-042-btc-in-huf)
      * [Move helpers to a new R package](#move-helpers-to-a-new-r-package)
-* [Home assignment](#home-assignment)
+* [Home assignment](#homeworks)
 * [References](#references)
 
 ## Schedule
