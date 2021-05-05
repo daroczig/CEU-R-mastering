@@ -2,11 +2,26 @@ This is the R script/materials repository of the "[Mastering R Skills](https://c
 
 ## Table of Contents
 
+* [Schedule](#schedule)
+* [Syllabus](#syllabus)
+* [Location](#location)
 * [Syllabus](#syllabus)
 * [Technical Prerequisites](#technical-prerequisites)
-* [Schedule](#schedule)
+* [Class materials](#class-materials)
 * [Home assignment](#home-assignment)
 * [References](#references)
+
+## Schedule
+
+3 x 200 mins on May 5, 12 and 19:
+
+* 15:30 - 17:00 session 1
+* 17:00 - 17:30 break
+* 17:30 - 19:00 session 2
+
+## Location
+
+This class will take place online. Find the Zoom URL shared in Moodle.
 
 ## Syllabus
 
@@ -61,7 +76,7 @@ Please find in the `syllabus` folder of this repository.
 
 Find more resources in Jenny Bryan's "[Happy Git and GitHub for the useR](http://happygitwithr.com/)" tutorial if in doubt or [contact me](#contact).
 
-## Schedule
+## Class materials
 
 To be uploaded after each class,
 
