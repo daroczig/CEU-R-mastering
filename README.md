@@ -449,6 +449,12 @@ log_info('My crypto fortune is {forint(BITCOINS * btcusd * usdhuf)}')
 
 Future materials will be uploaded after each class,
 
+## Homeworks
+
+### Week 1
+
+Create the `mr` R package described above with the `forint` and `get_bitcoin_price` functions, and push to a new repo in your GitHub account, so that you can install the package on any computer via `remotes::install_github`. Submit the URL to your GitHub repo in Moodle.
+
 ## References
 
 * AWS Console: https://ceu.signin.aws.amazon.com/console
