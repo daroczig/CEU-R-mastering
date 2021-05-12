@@ -447,6 +447,14 @@ log_info('1 BTC={dollar(btcusd)}')
 log_info('My crypto fortune is {forint(BITCOINS * btcusd * usdhuf)}')
 ```
 
+### Report on the price of 0.42 BTC in the past 30 days
+
+If you have missed the above steps on creating the R package with the required helpers, you can install the above version of `mr` via:
+
+```r
+devtools::install_github('daroczig/CEU-R-mastering-demo-pkg')
+```
+
 Future materials will be uploaded after each class,
 
 ## Homeworks
