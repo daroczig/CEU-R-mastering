@@ -948,7 +948,7 @@ Create the `mr` R package described above with the `forint` and `get_bitcoin_pri
 
 ### Week 2
 
-Create a new git branch in your (above created) git repo for the `mr` package, and add the newly created `get_usdhufs` function there. Then create a more generalized version of the function called `get_exchange_rates` that queries historical exchange rates for any currency pairs (so configurable `symbol` and `base` currency) for the provided time interval. Example run:
+Create a new git branch in your (above created) git repo for the `mr` package, and add the newly created `get_usdhufs` function there. Then create a more generalized version of the function called `get_exchange_rates` that queries historical exchange rates for any currency pair (so configurable `symbol` and `base` currency) for the provided time interval. Example run:
 
 ```r
 > get_exchange_rates('EUR', 'USD', start_date = '2020-05-12', end_date = '2020-05-13')
