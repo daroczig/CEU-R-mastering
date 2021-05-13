@@ -630,6 +630,8 @@ get_usdhufs <- function(start_date = Sys.Date(), end_date = Sys.Date(), retried 
 }
 ```
 
+</details>
+
 ### Report on the price of 0.42 BTC and 1.2 ETH in the past 30 days
 
 Let's do the same report as above, but now we not only have 0.42 Bitcoin, but 1.2 Ethereum as well.
