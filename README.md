@@ -978,6 +978,21 @@ Let's plan to use RStudio Desktop on your laptop next week due to working with E
 
 And download this file (12Mb) to your computer before the next class http://bit.ly/CEU-R-ecommerce with the `ecommerce.sqlite3.zip` file name.
 
+### Home Assignment
+
+For pass:
+
+1. Merge your PR from the second week's homework!
+2. Read the "Testing" chapter from Hadley's "R Packages" book at http://r-pkgs.had.co.nz/tests.html
+3. Create a new branch in your R package, write a unit test for the `forint` function to make sure that `forint(42)` returns `42 HUF`, open a pull request and share the PR URL on Moodle!
+
+For grade:
+
+4. Set up CI to automatically run your unit tests when pushing to GitHub (see https://r-pkgs.org/r-cmd-check.html)
+5. Set up a webpage for your package using `pkgdown` and GitHub Pages (see https://pkgdown.r-lib.org)
+
+Deadline: June 6, 2021 (midnight by CET)
+
 ## References
 
 * AWS Console: https://ceu.signin.aws.amazon.com/console
