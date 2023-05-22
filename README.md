@@ -123,6 +123,83 @@ coin_prices[symbol == 'BTC', usd * 0.42]
 
 Let's do the same report as above, but instead of USD, now let's report in Euros.
 
+<details>
+  <summary>Click here for a potential solution ...</summary>
+
+```r
+## How to get EUR/HUF rate?
+## See eg https://exchangerate.host for free API access
+
+## Loading data without any dependencies
+## https://api.exchangerate.host/latest
+## https://api.exchangerate.host/latest?base=USD
+
+readLines('https://api.exchangerate.host/latest?base=USD')
+
+## Parse JSON
+library(jsonlite)
+fromJSON(readLines('https://api.exchangerate.host/latest?base=USD'))
+fromJSON('https://api.exchangerate.host/latest?base=USD')
+
+## Extract the USD/HUF exchange rate from the list
+usdeur <- fromJSON('https://api.exchangerate.host/latest?base=USD&symbols=EUR')$rates$EUR
+coin_prices[symbol == 'BTC', 0.42 * usd * usdeur]
+```
+
+</details>
+
+<details>
+  <summary>Click here for a potential solution ... after cleaning up</summary>
+
+```r
+## loading requires packages on the top of the script
+library(binancer)
+library(httr)
+
+## constants
+BITCOINS <- 0.42
+
+## get Bitcoin price in USD
+coin_prices <- binance_coins_prices()
+btcusdt <- coin_prices[symbol == 'BTC', usd]
+
+## get USD/HUF exchange rate
+usdeur <- fromJSON('https://api.exchangerate.host/lat?base=USD&symbols=EUR')$rates$EUR
+
+## report
+BITCOINS * btcusdt * usdeur
+```
+
+</details>
+
+<details>
+  <summary>Click here for a potential solution ... with logging</summary>
+
+```r
+library(binancer)
+library(httr)
+library(data.table)
+library(logger)
+
+BITCOINS <- 0.42
+
+coin_prices <- binance_coins_prices()
+log_info('Found {coin_prices[, .N]} coins on Binance')
+btcusdt <- coin_prices[symbol == 'BTC', usd]
+log_info('The current Bitcoin price is ${btcusdt}')
+
+usdeur <- fromJSON('https://api.exchangerate.host/latest?base=USD&symbols=EUR')$rates$EUR
+log_info('1 USD currently costs {usdeur} EUR')
+
+log_eval(forint(BITCOINS * btcusdt * usdeur), level = INFO)
+log_info('{BITCOINS} Bitcoins now worth {round(btcusdt * usdeur * BITCOINS)} EUR')
+```
+
+</details>
+
+<details>
+  <summary>Click here for a potential solution ... with validating values received from the API</summary>
+
 ## Contact
 
 File a [GitHub ticket](https://github.com/daroczig/CEU-R-mastering/issues).
