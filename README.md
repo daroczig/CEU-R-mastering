@@ -69,11 +69,12 @@ Please find in the `syllabus` folder of this repository.
     * `daroczig/logger`
     * `daroczig/dbr`
 
-    If you get stuck, feel free to use the preconfigured, shared RStudio Server at http://mr.ceudata.net (I will share the usernames and passwords at the start of the class). In such case, you can skip all the steps prefixed with "💪" as the server already have that configured.
+    If you get stuck, feel free to use the preconfigured, shared RStudio Server at http://mr.ceudata.net/rstudio (I will share the usernames and passwords at the start of the class). In such case, you can skip all the steps prefixed with "💪" as the server already have that configured.
 
 2. Join the #ba-mr-2022 Slack channel in the `ceu-bizanalytics` Slack group.
 3. If you do not already have a GitHub account, create one
 4. Create a new GitHub repository called `mastering-r`
+4. Optionally create a new GitHub repository called `mastering-r` (or similar), but can be done later as well for th e R package (see below).
 5. 💪 Install `git` from https://git-scm.com/
 6. 💪 Verify that in RStudio, you can see the path of the `git` executable binary in the Tools/Global Options menu's "Git/Svn" tab -- if not, then you might have to restart RStudio (if you installed git after starting RStudio) or installed git by not adding that to the PATH on Windows. Either way, browse the "git executable" manually (in some `bin` folder look for thee `git` executable file).
 8. Create an RSA key via Tools/Global options/Git/Create RSA Key button (optionally with a passphrase for increased security -- that you have to enter every time you push and pull to and from GitHub), then copy the public key (from `~/.ssh/id_rsa.pub`) and add that to you SSH keys on your [GitHub profile](https://github.com/settings/ssh/new).
