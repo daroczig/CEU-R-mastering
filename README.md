@@ -200,6 +200,33 @@ log_info('{BITCOINS} Bitcoins now worth {round(btcusdt * usdeur * BITCOINS)} EUR
 <details>
   <summary>Click here for a potential solution ... with validating values received from the API</summary>
 
+```r
+library(binancer)
+library(httr)
+library(data.table)
+library(logger)
+library(checkmate)
+
+BITCOINS <- 0.42
+
+coin_prices <- binance_coins_prices()
+log_info('Found {coin_prices[, .N]} coins on Binance')
+btcusdt <- coin_prices[symbol == 'BTC', usd]
+log_info('The current Bitcoin price is ${btcusdt}')
+assert_number(btcusdt, lower = 1000)
+
+usdeur <- fromJSON('https://api.exchangerate.host/latest?base=USD&symbols=EUR')$rates$EUR
+log_info('1 USD currently costs {usdeur} EUR')
+assert_number(usdeur, lower = 0.9, upper = 1.1)
+
+log_info('{BITCOINS} Bitcoins now worth {round(btcusdt * usdeur * BITCOINS)} EUR')
+```
+
+</details>
+
+<details>
+  <summary>Click here for a potential solution ... with auto-retries for API errors</summary>
+
 ## Contact
 
 File a [GitHub ticket](https://github.com/daroczig/CEU-R-mastering/issues).
