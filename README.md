@@ -404,6 +404,12 @@ euro(get_bitcoin_price() * get_usdeur() * BITCOINS)
 
 10. Keep committing to the git repo
 11. Delete `hello.R` and rerun `roxygen2` / reinstall the package
+## Homeworks
+
+### Week 1
+
+Add the `get_usdeur` and `get_bitcoin_price` functions to your `mr` R package (including documentation and all required imports), and push to your GitHub repo, so that you can install the package on any computer via `remotes::install_github`. Submit the URL to your GitHub repo in Moodle.
+
 ## Contact
 
 File a [GitHub ticket](https://github.com/daroczig/CEU-R-mastering/issues).
