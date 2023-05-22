@@ -105,3 +105,25 @@ We have 0.42 Bitcoin. Let's write an R script reporting on the current value of 
 ## Contact
 
 File a [GitHub ticket](https://github.com/daroczig/CEU-R-mastering/issues).
+
+<details>
+  <summary>Click here for a potential solution ...</summary>
+
+```r
+## library(devtools)
+## install_github('daroczig/binancer')
+
+library(binancer)
+coin_prices <- binance_coins_prices()
+coin_prices[symbol == 'BTC', usd]
+
+## don't forget that we need to report on the price of 0.42 BTC instead of 1 BTC
+coin_prices[symbol == 'BTC', usd * 0.42]
+```
+
+</details>
+
+### Report on the current price of 0.42 BTC in EUR
+
+Let's do the same report as above, but instead of USD, now let's report in Euros.
+
