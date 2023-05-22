@@ -102,10 +102,6 @@ We have 0.42 Bitcoin. Let's write an R script reporting on the current value of 
   We installed the `binancer` package for a reason! Look up the related functions via `help(package = binancer)`.
 </details>
 
-## Contact
-
-File a [GitHub ticket](https://github.com/daroczig/CEU-R-mastering/issues).
-
 <details>
   <summary>Click here for a potential solution ...</summary>
 
@@ -127,3 +123,6 @@ coin_prices[symbol == 'BTC', usd * 0.42]
 
 Let's do the same report as above, but instead of USD, now let's report in Euros.
 
+## Contact
+
+File a [GitHub ticket](https://github.com/daroczig/CEU-R-mastering/issues).
