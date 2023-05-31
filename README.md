@@ -755,6 +755,11 @@ Add the `get_usdeur` and `get_bitcoin_price` functions to your `mr` R package (i
 
 Add the `get_usdeur` and `get_bitcoin_price` functions to your `mr` R package (including documentation and all required imports), and push to your GitHub repo, so that you can install the package on any computer via `remotes::install_github`. Submit the URL to your GitHub repo in Moodle.
 
+### Week 2
+
+Write unit tests for the `get_usdeurs` function, e.g. what happens when end date is lower than the start date, when he dates are not valid dates. Create a pull request for the main repo, and share the URL on Moodle.
+
+
 ## Contact
 
 File a [GitHub ticket](https://github.com/daroczig/CEU-R-mastering/issues).
