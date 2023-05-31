@@ -549,6 +549,57 @@ get_bitcoin_price <- memoise(
 )
 ```
 
+### Report on the price of 0.42 BTC in the past 30 days
+
+Let's do the same report as above, but instead of reporting the most recent value of the asset, let's report on the daily values from the past 30 days, e.g. on a line plot.
+
+<details>
+  <summary>Click here for a potential solution ... with fixed USD/HUF exchange rate</summary>
+
+```r
+library(binancer)
+library(httr)
+library(data.table)
+library(logger)
+library(ggplot2)
+library(mr)
+
+## ########################################################
+## CONSTANTS
+
+BITCOINS <- 0.42
+
+## ########################################################
+## Loading data
+
+usdeur <- get_usdeur()
+
+btcusdt <- binance_klines('BTCUSDT', interval = '1d', limit = 30)
+str(btcusdt)
+
+balance <- btcusdt[, .(date = as.Date(close_time), btcusd = close)]
+str(balance)
+
+balance[, btceur := btcusd * usdeur]
+balance[, btc := BITCOINS]
+balance[, value := btc * btceur]
+str(balance)
+
+## ########################################################
+## Report
+
+ggplot(balance, aes(date, value)) +
+  geom_line() +
+  xlab('') +
+  ylab('') +
+  scale_y_continuous(labels = euro) +
+  theme_bw() +
+  ggtitle('My crypto fortune',
+          subtitle = paste(BITCOINS, 'BTC'))
+```
+
+</details>
+
 ## Homeworks
 
 ### Week 1
