@@ -719,6 +719,8 @@ get_usdeurs <- memoise(
 )
 ```
 
+</details>
+
 ## Homeworks
 
 ### Week 1
