@@ -484,6 +484,71 @@ You can also install the above version of `mr` via:
 devtools::install_github('daroczig/CEU-R-mastering-demo-pkg')
 ```
 
+### Replace the home-brew retry with something better maintained
+
+Check out how `purrr::insistently` works!
+
+1. Import the `insistently` function `purrr` with a roxygen tag
+2. Add `purrr` to the `Imports` of your `DESCRIPTION` file
+3. Drop the `tryCatch` handler and let the function fail on error
+4. Wrap your function with `insistently`
+5. Optionally enable reporting on errors via setting the `quiet` flag to `FALSE`
+
+```r
+#' Look up the current price of a Bitcoin in USD
+#' @param retried number of times the function already failed
+#' @return number
+#' @export
+#' @importFrom binancer binance_coins_prices
+#' @importFrom logger log_error log_info
+#' @importFrom checkmate assert_number
+#' @import data.table
+#' @importFrom purrr insistently
+get_bitcoin_price <- insistently(function() {
+    if (runif(1) > 0.5) stop('oh nooo') # TODO drop
+    btcusdt <- binance_coins_prices()[symbol == 'BTC', usd]
+    assert_number(btcusdt, lower = 1000)
+    log_info('The current Bitcoin price is ${btcusdt}')
+    btcusdt
+}, quiet = FALSE)
+```
+
+### Speed up flaky API calls with caching
+
+Check out how `memoise::memoise` works! Make sure to set a TTL (time to live) for the cached value .. crypto markets are changing rapidly :)
+
+1. Import the `memoise` function `memoise` with a roxygen tag
+2. Add `memoise` to the `Imports` of your `DESCRIPTION` file
+3. Wrap your function with `memoise`
+4. Look up the `cache_mem` function of the `cachem` package mentioned in the `memoise` docs
+5. Set up a custom cache with a 5 seconds TTL by calling `cache_mem(max_age = 5)` as the `cache` argument of `memoise`, and make sure to do the related imports properly: add a roxygen tag to import `cache_mem` from `cachem` and add `cachem` in the `DESCRIPTION` file
+6. Indent your code so that it is clear which argument belongs to which function
+
+```r
+#' Look up the current price of a Bitcoin in USD
+#' @param retried number of times the function already failed
+#' @return number
+#' @export
+#' @importFrom binancer binance_coins_prices
+#' @importFrom logger log_error log_info
+#' @importFrom checkmate assert_number
+#' @import data.table
+#' @importFrom purrr insistently
+#' @importFrom memoise memoise
+#' @importFrom cachem cache_mem
+get_bitcoin_price <- memoise(
+    insistently(
+        function() {
+            btcusdt <- binance_coins_prices()[symbol == 'BTC', usd]
+            assert_number(btcusdt, lower = 1000)
+            log_info('The current Bitcoin price is ${btcusdt}')
+            btcusdt
+        },
+        quiet = FALSE),
+    cache = cache_mem(max_age = 5)
+)
+```
+
 ## Homeworks
 
 ### Week 1
