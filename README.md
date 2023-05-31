@@ -679,6 +679,46 @@ ggplot(balance, aes(date, value)) +
 
 </details>
 
+Now let's create the `get_usdeurs` function (similar to `get_usdeur`) to take start and end dates! Although we can set the start and end date default to today, so would return the same value as `get_usdeur` and could be the latter deprecated, not that this new function will return a `data.frame` or `data.table` object, so thus there's value in keeping the previous one as well.
+
+<details>
+  <summary><code>exchange_rates.R</code></summary>
+
+```r
+#' Look up the value of a US Dollar in Euro
+#' @param start_date date
+#' @param end_date date
+#' @return \code{data.table} object with dates and values
+#' @export
+#' @importFrom httr GET content
+#' @importFrom logger log_error log_info
+#' @importFrom checkmate assert_numeric
+#' @importFrom data.table data.table
+#' @importFrom purrr insistently
+#' @importFrom memoise memoise
+get_usdeurs <- memoise(
+    insistently(
+        function(start_date = Sys.Date(), end_date = Sys.Date()) {
+            response <- GET(
+                'https://api.exchangerate.host/timeseries',
+                query = list(
+                    start_date = start_date,
+                    end_date   = end_date,
+                    base       = 'USD',
+                    symbols    = 'EUR'
+                )
+            )
+            exchange_rates <- content(response)$rates
+            usdeur <- data.table(
+                date = as.Date(names(exchange_rates)),
+                usdeur = as.numeric(unlist(exchange_rates)))
+            assert_numeric(usdeur$usdeur, lower = 0.9, upper = 1.1)
+            usdeur
+        }
+    )
+)
+```
+
 ## Homeworks
 
 ### Week 1
