@@ -721,7 +721,35 @@ get_usdeurs <- memoise(
 
 </details>
 
+
+### Make sure our helper functions work!
+
+Make sure to consult the related chapter of Hadley Wickham's "R packages" book at http://r-pkgs.had.co.nz, but in short:
+
+0. Load the `usethis` package to scaffold the boring parts of setting up unit tests.
+1. Run `use_testthat` to configure the package for unit testing with `testthat`. This will update the `DESCRIPTION` file, create the `tests/testthat` folder and the `tests/testthat.R` file.
+2. Run `use_test('euro')` to generate `tests/testthat/test-euro.R`.
+3. Edit the `test-euro.R` file to write an actual test:
+
+    ```r
+    test_that("euro sign added", {
+      expect_equal(euro(2), '€2')
+    })
+    ```
+
+4. Run the test via `devtools::test()`
+5. Check test coverage via `devtools::test_coverage()`
+
+Check out some of the relevant advanced topics, e.g.
+
+* implementing automatically running the tests via GitHub Actions for future pushes in the repo
+* mock API calls, see e.g. https://r-pkgs.org/testing-advanced.html#mocking
+
 ## Homeworks
+
+### Week 1
+
+Add the `get_usdeur` and `get_bitcoin_price` functions to your `mr` R package (including documentation and all required imports), and push to your GitHub repo, so that you can install the package on any computer via `remotes::install_github`. Submit the URL to your GitHub repo in Moodle.
 
 ### Week 1
 
