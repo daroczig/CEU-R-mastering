@@ -404,6 +404,86 @@ euro(get_bitcoin_price() * get_usdeur() * BITCOINS)
 
 10. Keep committing to the git repo
 11. Delete `hello.R` and rerun `roxygen2` / reinstall the package
+12. Add a new function that gets the most exchange rate for USD/EUR:
+
+    <details>
+      <summary><code>converter.R</code></summary>
+
+    ```r
+    #' Look up the value of a US Dollar in EURs
+    #' @param retried number of times the function already failed
+    #' @return number
+    #' @export
+    #' @importFrom jsonlite fromJSON
+    #' @importFrom logger log_error log_info
+    #' @importFrom checkmate assert_number
+    get_usdeur <- function(retried = 0) {
+      tryCatch({
+        ## httr
+        usdeur <- fromJSON('https://api.exchangerate.host/latest?base=USD&symbols=EUR')$rates$EUR
+        assert_number(usdeur, lower = 0.9, upper = 1.1)
+      }, error = function(e) {
+        ## str(e)
+        log_error(e$message)
+        if (retried > 3) {
+          stop('Gave up')
+        }
+        Sys.sleep(1 + retried ^ 2)
+        get_usdeur(retried = retried + 1)
+      })
+      log_info('1 USD={usdeur} EUR')
+      usdeur
+    }
+    ```
+
+    </details>
+
+13. Now you can run the original R script hitting the Binance and exchangerate.host APIs by using these helper functions:
+
+```r
+library(binancer)
+library(logger)
+log_threshold(TRACE)
+library(scales)
+library(mr)
+
+BITCOINS <- 0.42
+log_info('Number of Bitcoins: {BITCOINS}')
+
+usdeur <- get_usdeur()
+
+btcusd <- binance_coins_prices()[symbol == 'BTC', usd]
+log_info('1 BTC={dollar(btcusd)}')
+
+log_info('My crypto fortune is {euro(BITCOINS * btcusd * usdeur)}')
+```
+
+14. Make sure that the R package works as intended, and then push to Github.
+
+### Recap of week 1
+
+* writing helper functions
+* API integrations
+* documenting helper functions
+* creating an R package from helper functions
+
+### Homework for week 1 gotchas
+
+* easy to mess up copy/paste
+* make sure to test your function in a clean environment
+* [import `data.table`](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-importing.html) if a package needs i!
+
+The homework has been published at https://github.com/daroczig/CEU-R-mastering-demo-pkg/tree/76b283914380f05e0ddfdb44b98fe6560d86dc02
+
+Let's fork the above repository and continue working on that from now on,
+so that later we can also prepare a pull request for the main repo!
+
+You can also install the above version of `mr` via:
+
+```r
+devtools::install_github('daroczig/CEU-R-mastering-demo-pkg')
+```
+
 ## Homeworks
 
 ### Week 1
