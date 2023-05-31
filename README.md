@@ -600,6 +600,85 @@ ggplot(balance, aes(date, value)) +
 
 </details>
 
+<details>
+  <summary>Click here for a potential solution ... with daily corrected USD/HUF exchange rate</summary>
+
+```r
+library(binancer)
+library(httr)
+library(data.table)
+library(logger)
+library(scales)
+library(ggplot2)
+library(mr)
+
+## ########################################################
+## CONSTANTS
+
+BITCOINS <- 0.42
+
+## ########################################################
+## Loading data
+
+usdeur <- get_usdeur()
+
+## try with a single date?
+fromJSON('https://api.exchangerate.host/2023-05-01?base=USD&symbols=HUF')
+## no, it's just a single day
+# fromJSON('https://api.exchangerate.host/timeseries?start_date=2023-05-01&base=USD&symbols=HUF')
+## need end
+fromJSON('https://api.exchangerate.host/timeseries?start_date=2023-05-01&end_date=2023-05-05&base=USD&symbols=HUF')
+## we can do a much better job!
+
+library(httr)
+response <- GET(
+  'https://api.exchangerate.host/timeseries',
+  query = list(
+    start_date = Sys.Date() - 30,
+    end_date   = Sys.Date(),
+    base       = 'USD',
+    symbols    = 'EUR'
+  ))
+exchange_rates <- content(response)
+str(exchange_rates)
+exchange_rates <- exchange_rates$rates
+
+library(data.table)
+usdeur <- data.table(
+  date = as.Date(names(exchange_rates)),
+  usdeur = as.numeric(unlist(exchange_rates)))
+str(usdeur)
+## NOTE last element might be an empty list if early in the day ...
+##      query yesterday or drop last row when this occurs
+
+## Bitcoin price in USD
+btcusdt <- binance_klines('BTCUSDT', interval = '1d', limit = 30)
+str(btcusdt)
+
+balance <- btcusdt[, .(date = as.Date(close_time), btcusd = close)]
+str(balance)
+str(usdeur)
+
+balance <- merge(balance, usdeur, by = 'date')
+balance[, btceur := btcusd * usdeur]
+balance[, btc := 0.42]
+balance[, value := btc * btceur]
+
+## ########################################################
+## Report
+
+ggplot(balance, aes(date, value)) +
+  geom_line() +
+  xlab('') +
+  ylab('') +
+  scale_y_continuous(labels = euro) +
+  theme_bw() +
+  ggtitle('My crypto fortune',
+          subtitle = paste(BITCOINS, 'BTC'))
+```
+
+</details>
+
 ## Homeworks
 
 ### Week 1
