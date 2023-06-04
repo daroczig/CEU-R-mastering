@@ -7,10 +7,18 @@ This is the R script/materials repository of the "[Mastering R Skills](https://c
 * [Syllabus](#syllabus)
 * [Technical Prerequisites](#technical-prerequisites)
 * [Class materials](#class-materials)
-  * [API ingest and data transformation exercises](#api-ingest-and-data-transformation-exercises)
-     * [Report on the current price of 0.42 BTC](#report-on-the-current-price-of-042-btc)
-
-* [Home assignment](#homeworks)
+  * [Report on the current price of 0.42 BTC](#report-on-the-current-price-of-042-btc)
+  * [Report on the current price of 0.42 BTC in EUR](#report-on-the-current-price-of-042-btc-in-eur)
+  * [Move helpers to a new R package](#move-helpers-to-a-new-r-package)
+  * [Recap of week 1](#recap-of-week-1)
+  * [Homework for week 1 gotchas](#homework-for-week-1-gotchas)
+  * [Replace the home-brew retry with something better maintained](#replace-the-home-brew-retry-with-something-better-maintained)
+  * [Speed up flaky API calls with caching](#speed-up-flaky-api-calls-with-caching)
+  * [Report on the price of 0.42 BTC in the past 30 days](#report-on-the-price-of-042-btc-in-the-past-30-days)
+  * [Make sure our helper functions work!](#make-sure-our-helper-functions-work)
+* [Home assignments](#homeworks)
+  * [Week 1](#week-1)
+  * [Week 2](#week-2)
 * [References](#references)
 
 ## Schedule
