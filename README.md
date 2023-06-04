@@ -314,7 +314,6 @@ euro(get_bitcoin_price() * get_usdeur() * BITCOINS)
 
 </details>
 
-
 ### Move helpers to a new R package
 
 1. Click File / New Project / New folder and create a new R package (maybe call it `mr`, also create a git repo for it) -- that will fill in your newly created folder with a package skeleton delivering the `hello` function in the `hello.R` file.
@@ -719,8 +718,46 @@ get_usdeurs <- memoise(
 )
 ```
 
-</details>
+<details>
+  <summary><code>Cleaned up R script using the above helper function</code></summary>
 
+```r
+library(binancer)
+library(data.table)
+library(ggplot2)
+library(mr)
+
+## ########################################################
+## CONSTANTS
+
+BITCOINS <- 0.42
+
+## ########################################################
+## Loading data
+
+usdeurs <- get_usdeurs(Sys.Date() - 30, Sys.Date())
+btcusdt <- binance_klines('BTCUSDT', interval = '1d', limit = 30)
+balance <- btcusdt[, .(date = as.Date(close_time), btcusd = close)]
+
+balance <- merge(balance, usdeurs, by = 'date')
+balance[, btceur := btcusd * usdeur]
+balance[, btc := BITCOINS]
+balance[, value := btc * btceur]
+
+## ########################################################
+## Report
+
+ggplot(balance, aes(date, value)) +
+  geom_line() +
+  xlab('') +
+  ylab('') +
+  scale_y_continuous(labels = euro) +
+  theme_bw() +
+  ggtitle('My crypto fortune',
+          subtitle = paste(BITCOINS, 'BTC'))
+```
+
+</details>
 
 ### Make sure our helper functions work!
 
