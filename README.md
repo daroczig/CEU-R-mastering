@@ -717,6 +717,7 @@ get_usdeurs <- memoise(
     )
 )
 ```
+</details>
 
 <details>
   <summary><code>Cleaned up R script using the above helper function</code></summary>
