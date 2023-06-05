@@ -889,6 +889,59 @@ ggplot(balance, aes(date, value, fill = symbol)) +
     mysql -h mr.cf27iwlo5bzr.eu-west-1.rds.amazonaws.com -u admin -p
     ```
 
+    Look around:
+
+    ```shell
+    show databases;
+    use crypto;
+    show tables;
+    desc coins;
+    select * FROM coins;
+    ```
+
+3. 💪 Install `dbr` from GitHub:
+
+    ```r
+    library(devtools)
+    install_github('daroczig/logger')
+    install_github('daroczig/dbr')
+    ```
+
+4. 💪 Install `botor` as well to be able to use encrypted credentials (note that this requires you to install Python first and then `pip install boto3` as well):
+
+    ```r
+    install_github('daroczig/botor')
+    ```
+
+5. Set up a YAML file (menu: new file/text file, save as `databases.yml`) for the database connection, something like:
+
+   ```shell
+   remotemysql:
+     host: ...
+     port: 3306
+     dbname: ...
+     user: ...
+     drv: !expr RMySQL::MySQL()
+     password: ...
+   ```
+
+6. Set up `dbr` to use that YAML file:
+
+    ```r
+    options('dbr.db_config_path' = '/path/to/databases.yml')
+    ```
+
+7. 💪 Create a table for the balances and insert some records:
+
+    ```r
+    library(dbr)
+    db_config('remotemysql')
+    db_query('CREATE TABLE coins (symbol VARCHAR(3) NOT NULL, amount DOUBLE NOT NULL DEFAULT 0)', 'remotemysql')
+    db_query('TRUNCATE TABLE coins', 'remotemysql')
+    db_query('INSERT INTO coins VALUES ("BTC", 0.42)', 'remotemysql')
+    db_query('INSERT INTO coins VALUES ("ETH", 1.2)', 'remotemysql')
+    ```
+
 ## Homeworks
 
 ### Week 1
