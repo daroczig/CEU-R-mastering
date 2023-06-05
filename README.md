@@ -19,6 +19,8 @@ This is the R script/materials repository of the "[Mastering R Skills](https://c
   * [Recap of week 2](#recap-of-week-2)
   * [Homework for week 2 gotchas](#homework-for-week-2-gotchas)
   * [Report on the price of 0.42 BTC and 1.2 ETH in the past 30 days](#report-on-the-price-of-042-btc-and-12-eth-in-the-past-30-days)
+  * [Report on the price of cryptocurrency assets read from a database](#report-on-the-price-of-cryptocurrency-assets-read-from-a-database)
+  * [Report on the price of cryptocurrency assets based on the transaction history read from a database](#report-on-the-price-of-cryptocurrency-assets-based-on-the-transaction-history-read-from-a-database)
 * [Home assignments](#homeworks)
   * [Week 1](#week-1)
   * [Week 2](#week-2)
@@ -1099,6 +1101,93 @@ ggplot(balance, aes(date, value, fill = symbol)) +
 ```
 
 </details>
+
+## Profiling, benchmarks
+
+Breaking down the a single run of the `get_usdhuf` function to see which component is slow and taking up resources:
+
+```r
+library(mr)
+
+library(profvis)
+profvis({
+  get_usdeur()
+})
+
+profvis({
+  get_usdhuf()
+}, interval = 0.005)
+```
+
+A more realistic example: is `ggplot2` indeed slow when generating scatter plots on a dataset with larger number of observations?
+
+Note first run for the `library` call! Then run again.
+
+```r
+profvis({
+  library(ggplot2)
+  x <- ggplot(diamonds, aes(price, carat)) + geom_point()
+  print(x)
+})
+
+system.time(x <- ggplot(diamonds, aes(price, carat)) + geom_point())
+```
+
+Pipe VS Bracket:
+
+```r
+library(data.table)
+library(dplyr)
+dt <- data.table(diamonds)
+profvis({
+  dt[, sum(carat), by = color][order(color)]
+  group_by(dt, color) %>% summarise(price = sum(carat))
+})
+## run too quickly for profiling ...
+
+library(microbenchmark)
+results <- microbenchmark(
+  aggregate(dt$carat, by = list(dt$color), FUN = sum),
+  dt[, sum(carat), by = color][order(color)],
+  group_by(dt, color) %>% summarise(price = sum(carat)),
+  times = 100)
+
+results
+plot(results)
+autoplot(results)
+
+library(bench)
+## needs to make sure that resulting objects are the same
+results <- bench::mark(
+  as.data.frame(dt[, .(price = sum(carat)), by = color][order(color)]),
+  as.data.frame(group_by(dt, color) %>% summarize(price = sum(carat)))
+)
+
+results
+autoplot(results)
+
+## revisit benchmarking creating and printing ggplot
+results <- microbenchmark(
+  x <- ggplot(diamonds, aes(price, carat)) + geom_point(),
+  print(x),
+  times = 10)
+```
+
+Also check out `dtplyr`!
+
+More examples at https://rstudio.github.io/profvis/examples.html
+
+## Reporting exercises
+
+### Connecting to and exploring the SQLite database
+
+Download and extract the database file:
+
+```r
+## download database file
+download.file('http://bit.ly/CEU-R-ecommerce', 'ecommerce.zip', mode = 'wb')
+unzip('ecommerce.zip')
+```
 
 ## Homeworks
 
