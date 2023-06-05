@@ -879,6 +879,16 @@ ggplot(balance, aes(date, value, fill = symbol)) +
 
 </details>
 
+### Report on the price of cryptocurrency assets read from a database
+
+1. 💪 Create a new MySQL database at Amazon AWS and don't forget to set an "inital database name" and make it publicly accessible.
+
+2. Log in and give a try with MySQL client:
+
+    ```shell
+    mysql -h mr.cf27iwlo5bzr.eu-west-1.rds.amazonaws.com -u admin -p
+    ```
+
 ## Homeworks
 
 ### Week 1
