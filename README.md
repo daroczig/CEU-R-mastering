@@ -16,6 +16,9 @@ This is the R script/materials repository of the "[Mastering R Skills](https://c
   * [Speed up flaky API calls with caching](#speed-up-flaky-api-calls-with-caching)
   * [Report on the price of 0.42 BTC in the past 30 days](#report-on-the-price-of-042-btc-in-the-past-30-days)
   * [Make sure our helper functions work!](#make-sure-our-helper-functions-work)
+  * [Recap of week 2](#recap-of-week-2)
+  * [Homework for week 2 gotchas](#homework-for-week-2-gotchas)
+  * [Report on the price of 0.42 BTC and 1.2 ETH in the past 30 days](#report-on-the-price-of-042-btc-and-12-eth-in-the-past-30-days)
 * [Home assignments](#homeworks)
   * [Week 1](#week-1)
   * [Week 2](#week-2)
@@ -806,6 +809,75 @@ devtools::install_github('daroczig/CEU-R-mastering-demo-pkg@week2')
 ### Homework for week 2 gotchas
 
 [![A QA engineer walks into a bar. Orders a beer. Orders 0 beers. Orders 99999999999 beers. Orders a lizard. Orders -1 beers. Orders a ueicbksjdhd. First real customer walks in and asks where the bathroom is. The bar bursts into flames, killing everyone.](https://github.com/daroczig/CEU-R-mastering/assets/495736/18d88b52-fd09-4ee0-91a1-8b96e062f89c)](https://twitter.com/brenankeller/status/1068615953989087232)
+
+### Report on the price of 0.42 BTC and 1.2 ETH in the past 30 days
+
+Let's do the same report as above, but now we not only have 0.42 Bitcoin, but 1.2 Ethereum as well.
+
+<details>
+  <summary>Click here for a potential solution ...</summary>
+
+```r
+library(binancer)
+library(data.table)
+library(ggplot2)
+library(mr)
+
+## ########################################################
+## CONSTANTS
+
+BITCOINS  <- 0.42
+ETHEREUMS <- 1.2
+
+## ########################################################
+## Loading data
+
+usdeurs <- get_usdeurs(start_date = Sys.Date() - 30, end_date = Sys.Date())
+
+## Cryptocurrency prices in USD
+btcusdt <- binance_klines('BTCUSDT', interval = '1d', limit = 30)
+ethusdt <- binance_klines('ETHUSDT', interval = '1d', limit = 30)
+coinusdt <- rbind(btcusdt, ethusdt)
+str(coinusdt)
+## oh no, how to keep the symbol??
+coinusdt[, .(date = as.Date(close_time), btcusd = close, symbol = ???)]
+
+## DRY (don't repeat yourself)
+balance <- rbindlist(lapply(c('BTC', 'ETH'), function(s) {
+  binance_klines(paste0(s, 'USDT'), interval = '1d', limit = 30)[, .(
+    date = as.Date(close_time),
+    usdt = close,
+    symbol = s
+  )]
+}))
+
+balance <- balance[, amount := switch(
+  symbol,
+  'BTC' = BITCOINS,
+  'ETH' = ETHEREUMS,
+  stop('Unsupported coin')),
+  by = symbol]
+str(balance)
+
+balance <- merge(balance, usdeurs, by = 'date')
+balance[, value := amount * usdt * usdeur]
+str(balance)
+
+## ########################################################
+## Report
+
+ggplot(balance, aes(date, value, fill = symbol)) +
+  geom_col() +
+  xlab('') +
+  ylab('') +
+  scale_y_continuous(labels = euro) +
+  theme_bw() +
+  ggtitle(
+    'My crypto fortune',
+    subtitle = balance[date == max(date), paste(paste(amount, symbol), collapse = ' + ')])
+```
+
+</details>
 
 ## Homeworks
 
