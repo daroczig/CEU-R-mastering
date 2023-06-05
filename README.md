@@ -942,6 +942,92 @@ ggplot(balance, aes(date, value, fill = symbol)) +
     db_query('INSERT INTO coins VALUES ("ETH", 1.2)', 'remotemysql')
     ```
 
+8. Write the reporting script, something like:
+
+    <details>
+      <summary>Click here for a potential solution ...</summary>
+
+    ```r
+    library(binancer)
+    library(data.table)
+    library(logger)
+    library(ggplot2)
+    library(mr)
+
+    library(dbr)
+    options('dbr.db_config_path' = '/path/to/databases.yml')
+    options('dbr.output_format' = 'data.table')
+
+    ## ########################################################
+    ## Loading data
+
+    ## Read actual balances from the DB
+    balance <- db_query('SELECT * FROM coins', 'remotemysql')
+
+    ## Look up cryptocurrency prices in USD and merge balances
+    balance <- rbindlist(lapply(balance$symbol, function(s) {
+      binance_klines(paste0(s, 'USDT'), interval = '1d', limit = 30)[, .(
+        date = as.Date(close_time),
+        usdt = close,
+        symbol = s,
+        amount = balance[symbol == s, amount]
+      )]
+    }))
+
+    ## USD in EUR
+    usdeurs <- get_usdeurs(start_date = Sys.Date() - 30, end_date = Sys.Date())
+
+    ## join USD/HUF exchange rate to balances
+    balance <- merge(balance, usdeurs, by = 'date')
+    balance[, value := amount * usdt * usdeur]
+
+    ## ########################################################
+    ## Report
+
+    ggplot(balance, aes(date, value, fill = symbol)) +
+      geom_col() +
+      xlab('') +
+      ylab('') +
+      #scale_y_continuous(labels = forint) +
+      theme_bw() +
+      ggtitle(
+        'My crypto fortune',
+        subtitle = balance[date == max(date), paste(paste(amount, symbol), collapse = ' + ')])
+    ```
+
+    </details>
+
+9. Rerun the above report after inserting two new records to the table:
+
+    ```r
+    db_query("INSERT INTO coins VALUES ('NEO', 100)", 'remotemysql')
+    db_query("INSERT INTO coins VALUES ('LTC', 25)", 'remotemysql')
+    ```
+
+### Report on the price of cryptocurrency assets based on the transaction history read from a database
+
+💪 Let's prepare the transactions table:
+
+```r
+library(dbr)
+options('dbr.db_config_path' = '/path/to/database.yml')
+options('dbr.output_format' = 'data.table')
+
+db_query('
+  CREATE TABLE transactions (
+    date TIMESTAMP NOT NULL,
+    symbol VARCHAR(3) NOT NULL,
+    amount DOUBLE NOT NULL DEFAULT 0)',
+  db = 'remotemysql')
+
+db_query('TRUNCATE TABLE transactions', 'remotemysql')
+db_query('INSERT INTO transactions VALUES ("2023-05-11 10:42:02", "BTC", 1.42)', 'remotemysql')
+db_query('INSERT INTO transactions VALUES ("2023-05-11 10:45:20", "ETH", 1.2)', 'remotemysql')
+db_query('INSERT INTO transactions VALUES ("2023-05-18", "BTC", -1)', 'remotemysql')
+db_query('INSERT INTO transactions VALUES ("2023-05-23", "NEO", 100)', 'remotemysql')
+db_query('INSERT INTO transactions VALUES ("2023-05-30 12:12:21", "LTC", 25)', 'remotemysql')
+```
+
 ## Homeworks
 
 ### Week 1
