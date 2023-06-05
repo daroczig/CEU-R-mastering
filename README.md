@@ -791,6 +791,22 @@ Check out some of the relevant advanced topics, e.g.
 * implementing automatically running the tests via GitHub Actions for future pushes in the repo
 * mock API calls, see e.g. https://r-pkgs.org/testing-advanced.html#mocking
 
+### Recap of week 2
+
+* revisit retries and caching
+* further API integrations
+* unit testing
+
+It is recommended to install the current version of `mr`:
+
+```r
+devtools::install_github('daroczig/CEU-R-mastering-demo-pkg@week2')
+```
+
+### Homework for week 2 gotchas
+
+[![A QA engineer walks into a bar. Orders a beer. Orders 0 beers. Orders 99999999999 beers. Orders a lizard. Orders -1 beers. Orders a ueicbksjdhd. First real customer walks in and asks where the bathroom is. The bar bursts into flames, killing everyone.](https://github.com/daroczig/CEU-R-mastering/assets/495736/18d88b52-fd09-4ee0-91a1-8b96e062f89c)](https://twitter.com/brenankeller/status/1068615953989087232)
+
 ## Homeworks
 
 ### Week 1
