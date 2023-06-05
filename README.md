@@ -1028,6 +1028,78 @@ db_query('INSERT INTO transactions VALUES ("2023-05-23", "NEO", 100)', 'remotemy
 db_query('INSERT INTO transactions VALUES ("2023-05-30 12:12:21", "LTC", 25)', 'remotemysql')
 ```
 
+<details>
+  <summary>Click here for a potential solution for the report ...</summary>
+
+```r
+library(binancer)
+library(data.table)
+library(logger)
+library(ggplot2)
+library(zoo)
+library(mr)
+
+## ########################################################
+## Loading data
+
+## Read transactions from the DB
+transactions <- db_query('SELECT * FROM transactions', 'remotemysql')
+
+## Prepare daily balance sheets
+balance <- transactions[, .(date = as.Date(date), amount = cumsum(amount)), by = symbol]
+balance
+
+## Transform long table into wide
+balance <- dcast(balance, date ~ symbol)
+balance
+
+## Add missing dates
+dates <- data.table(date = seq(from = Sys.Date() - 30, to = Sys.Date(), by = '1 day'))
+balance <- merge(balance, dates, by = 'date', all.x = TRUE, all.y = TRUE)
+balance
+
+## Fill in missing values between actual balances
+balance <- na.locf(balance, na.rm = FALSE)
+
+## Fill in remaining missing values with zero
+balance[is.na(balance)] <- 0
+
+## Transform wide table back to long format
+balance <- melt(balance, id.vars = 'date', variable.name = 'symbol', value.name = 'amount')
+balance
+
+## Get crypto prices
+prices <- rbindlist(lapply(as.character(unique(balance$symbol)), function(s) {
+    binance_klines(paste0(s, 'USDT'), interval = '1d', limit = 30)[
+      , .(date = as.Date(close_time), symbol = s, usdt = close)]
+}))
+balance <- merge(balance, prices, by = c('date', 'symbol'), all.x = TRUE, all.y = FALSE)
+
+## USD in EUR
+usdeurs <- get_usdeurs(start_date = Sys.Date() - 30, end_date = Sys.Date())
+
+## join USD/HUF exchange rate to balances
+balance <- merge(balance, usdeurs, by = 'date')
+balance[, value := amount * usdt * usdeur]
+
+## compute daily values in HUF
+balance[, value := amount * usdt * usdhuf]
+
+## ########################################################
+## Report
+
+ggplot(balance, aes(date, value, fill = symbol)) +
+    geom_col() +
+    ylab('') + scale_y_continuous(labels = euro) +
+    xlab('') +
+    theme_bw() +
+    ggtitle(
+        'My crypto fortune',
+        subtitle = balance[date == max(date), paste(paste(amount, symbol), collapse = ' + ')])
+```
+
+</details>
+
 ## Homeworks
 
 ### Week 1
