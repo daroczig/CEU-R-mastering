@@ -24,6 +24,7 @@ This is the R script/materials repository of the "[Mastering R Skills](https://c
 * [Home assignments](#homeworks)
   * [Week 1](#week-1)
   * [Week 2](#week-2)
+  * [Week 3](#week-3)
 * [References](#references)
 
 ## Schedule
@@ -1425,6 +1426,16 @@ Add the `get_usdeur` and `get_bitcoin_price` functions to your `mr` R package (i
 
 Write unit tests for the `get_usdeurs` function, e.g. what happens when end date is lower than the start date, when he dates are not valid dates. Create a pull request for the main repo, and share the URL on Moodle.
 
+### Week 3
+
+Use GitHub Actions to either run the unit tests of the package after each push to GitHub, or to build documentation and publish using GitHub Pages.
+
+References:
+
+* https://r-pkgs.org/software-development-practices.html#sec-sw-dev-practices-ci
+* https://r-pkgs.org/website.html
+
+Share the URL of a successful GitHub Actions run on Moodle.
 
 ## Contact
 
