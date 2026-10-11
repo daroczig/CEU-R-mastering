@@ -141,21 +141,21 @@ Let's do the same report as above, but instead of USD, now let's report in Euros
 
 ```r
 ## How to get EUR/HUF rate?
-## See eg https://exchangerate.host for free API access
+## See eg https://allratestoday.com/api/open/central-bank/ecb for free, keyless API access (exchangerate.host requires a key since 2023)
 
 ## Loading data without any dependencies
-## https://api.exchangerate.host/latest
-## https://api.exchangerate.host/latest?base=USD
+## https://allratestoday.com/api/compat/exchangerate-host/latest
+## https://allratestoday.com/api/compat/exchangerate-host/latest?base=USD
 
-readLines('https://api.exchangerate.host/latest?base=USD')
+readLines('https://allratestoday.com/api/compat/exchangerate-host/latest?base=USD')
 
 ## Parse JSON
 library(jsonlite)
-fromJSON(readLines('https://api.exchangerate.host/latest?base=USD'))
-fromJSON('https://api.exchangerate.host/latest?base=USD')
+fromJSON(readLines('https://allratestoday.com/api/compat/exchangerate-host/latest?base=USD'))
+fromJSON('https://allratestoday.com/api/compat/exchangerate-host/latest?base=USD')
 
 ## Extract the USD/HUF exchange rate from the list
-usdeur <- fromJSON('https://api.exchangerate.host/latest?base=USD&symbols=EUR')$rates$EUR
+usdeur <- fromJSON('https://allratestoday.com/api/compat/exchangerate-host/latest?base=USD&symbols=EUR')$rates$EUR
 coin_prices[symbol == 'BTC', 0.42 * usd * usdeur]
 ```
 
@@ -177,7 +177,7 @@ coin_prices <- binance_coins_prices()
 btcusdt <- coin_prices[symbol == 'BTC', usd]
 
 ## get USD/HUF exchange rate
-usdeur <- fromJSON('https://api.exchangerate.host/lat?base=USD&symbols=EUR')$rates$EUR
+usdeur <- fromJSON('https://allratestoday.com/api/compat/exchangerate-host/lat?base=USD&symbols=EUR')$rates$EUR
 
 ## report
 BITCOINS * btcusdt * usdeur
@@ -201,7 +201,7 @@ log_info('Found {coin_prices[, .N]} coins on Binance')
 btcusdt <- coin_prices[symbol == 'BTC', usd]
 log_info('The current Bitcoin price is ${btcusdt}')
 
-usdeur <- fromJSON('https://api.exchangerate.host/latest?base=USD&symbols=EUR')$rates$EUR
+usdeur <- fromJSON('https://allratestoday.com/api/compat/exchangerate-host/latest?base=USD&symbols=EUR')$rates$EUR
 log_info('1 USD currently costs {usdeur} EUR')
 
 log_eval(BITCOINS * btcusdt * usdeur, level = INFO)
@@ -228,7 +228,7 @@ btcusdt <- coin_prices[symbol == 'BTC', usd]
 log_info('The current Bitcoin price is ${btcusdt}')
 assert_number(btcusdt, lower = 1000)
 
-usdeur <- fromJSON('https://api.exchangerate.host/latest?base=USD&symbols=EUR')$rates$EUR
+usdeur <- fromJSON('https://allratestoday.com/api/compat/exchangerate-host/latest?base=USD&symbols=EUR')$rates$EUR
 log_info('1 USD currently costs {usdeur} EUR')
 assert_number(usdeur, lower = 0.9, upper = 1.1)
 
@@ -251,7 +251,7 @@ BITCOINS <- 0.42
 
 get_usdeur <- function() {
   tryCatch({
-    usdeur <- fromJSON('https://api.exchangerate.host/latest?base=USD&symbols=EUR')$rates$EUR
+    usdeur <- fromJSON('https://allratestoday.com/api/compat/exchangerate-host/latest?base=USD&symbols=EUR')$rates$EUR
     assert_number(usdeur, lower = 0.9, upper = 1.1)
   }, error = function(e) {
     ## str(e)
@@ -289,7 +289,7 @@ log_info('{BITCOINS} Bitcoins now worth {round(get_bitcoin_price() * get_usdeur(
 get_usdeur <- function(retried = 0) {
   tryCatch({
     ## httr
-    usdeur <- fromJSON('https://api.exchangerate.host/latest?base=USD&symbols=EUR')$rates$EUR
+    usdeur <- fromJSON('https://allratestoday.com/api/compat/exchangerate-host/latest?base=USD&symbols=EUR')$rates$EUR
     assert_number(usdeur, lower = 0.9, upper = 1.1)
   }, error = function(e) {
     ## str(e)
@@ -433,7 +433,7 @@ euro(get_bitcoin_price() * get_usdeur() * BITCOINS)
     get_usdeur <- function(retried = 0) {
       tryCatch({
         ## httr
-        usdeur <- fromJSON('https://api.exchangerate.host/latest?base=USD&symbols=EUR')$rates$EUR
+        usdeur <- fromJSON('https://allratestoday.com/api/compat/exchangerate-host/latest?base=USD&symbols=EUR')$rates$EUR
         assert_number(usdeur, lower = 0.9, upper = 1.1)
       }, error = function(e) {
         ## str(e)
